@@ -4,29 +4,41 @@
 **Company:** DN Tech (PT. Dozer Napitupulu Technology)  
 **Product / package:** Threads Automation (`threads-automation`)  
 **Local path:** `auto/`  
-**UpdatedAt:** 24 Juli 2026  
-**Status:** MVP Phase 1 **implemented in code** · real publish Conditional (`PLAYWRIGHT_DRY_RUN`) · no automated tests yet  
-**Spec baseline:** PRD/SRS/SDD **v1.0 Draft** (22 Jun 2026)
+**UpdatedAt:** 25 Juli 2026  
+**Status:** **v2.0 Live Publish & Media** · live Conditional (toggle + `PLAYWRIGHT_DRY_RUN`) · **tanpa Docker**  
+**Spec baseline:** PRD/SRS/SDD **v2.0** (+ v1.0 Draft)
 
-> **Mulai di sini untuk PRD berikutnya:** [NEXT-PRD-BRIEF.md](./NEXT-PRD-BRIEF.md)  
-> **Baseline panjang:** [CURRENT-IMPLEMENTATION.md](./CURRENT-IMPLEMENTATION.md)  
+### Mulai di sini
+
+| Peran | Baca dulu |
+|-------|-----------|
+| **Pakai app harian** | [USER-GUIDE.md](./USER-GUIDE.md) |
+| **Paham alur sistem** | [HOW-IT-WORKS.md](./HOW-IT-WORKS.md) |
+| **Deploy VPS** | [DEPLOY.md](./DEPLOY.md) |
+| **Nyalakan live publish** | [RUNBOOK.md](./RUNBOOK.md) |
+
 > **Wiki mirror:** `company-wiki/docs/products/threads-automation/`
 
 | File | Deskripsi |
 |------|-----------|
-| [PROJECT-OVERVIEW.md](./PROJECT-OVERVIEW.md) | Apa itu produk, visi, stack ringkas |
-| [CURRENT-IMPLEMENTATION.md](./CURRENT-IMPLEMENTATION.md) | Baseline kode untuk PRD berikutnya |
-| [IMPLEMENTATION-STATUS.md](./IMPLEMENTATION-STATUS.md) | Status Phase 1–3 vs roadmap PRD |
-| [FEATURE-CATALOG.md](./FEATURE-CATALOG.md) | Fitur Available / Conditional / Roadmap |
-| [NEXT-PRD-BRIEF.md](./NEXT-PRD-BRIEF.md) | **Satu file** briefing PRD berikutnya |
-| [API.md](./API.md) | Ringkasan endpoint `/v1` |
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | Komponen & data flow |
+| [USER-GUIDE.md](./USER-GUIDE.md) | **Cara pakai** — login, schedule, media, CSV, history, live |
+| [HOW-IT-WORKS.md](./HOW-IT-WORKS.md) | **Cara kerja** — komponen, alur publish, dry-run/live, media |
+| [PROJECT-OVERVIEW.md](./PROJECT-OVERVIEW.md) | Apa itu produk, visi, persona |
+| [DEPLOY.md](./DEPLOY.md) | VPS: Postgres + Redis + systemd (**no Docker**) |
+| [RUNBOOK.md](./RUNBOOK.md) | Checklist enable live mode dengan aman |
+| [FEATURE-CATALOG.md](./FEATURE-CATALOG.md) | Available / Conditional / Roadmap |
+| [IMPLEMENTATION-STATUS.md](./IMPLEMENTATION-STATUS.md) | Status v2.0 vs spek |
+| [CURRENT-IMPLEMENTATION.md](./CURRENT-IMPLEMENTATION.md) | Baseline teknis |
+| [API.md](./API.md) | Endpoint `/v1` |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | Diagram komponen ringkas |
 | [CHANGELOG.md](./CHANGELOG.md) | Riwayat living docs / produk |
+| [NEXT-PRD-BRIEF.md](./NEXT-PRD-BRIEF.md) | Briefing PRD berikutnya (post-v2) |
+| [PRD/PRD-v2.0-Live-Publish-Media.md](./PRD/PRD-v2.0-Live-Publish-Media.md) | Product requirements v2.0 |
+| [PRD/SRS-v2.0-Functional-Requirements.md](./PRD/SRS-v2.0-Functional-Requirements.md) | Functional requirements v2.0 |
+| [PRD/SDD-v2.0-System-Design.md](./PRD/SDD-v2.0-System-Design.md) | System design v2.0 |
 | [PRD/THREADS_AUTOMATION_PRD.md](./PRD/THREADS_AUTOMATION_PRD.md) | Product requirements v1.0 |
 | [PRD/THREADS_AUTOMATION_SRS.md](./PRD/THREADS_AUTOMATION_SRS.md) | Software requirements v1.0 |
 | [PRD/THREADS_AUTOMATION_SDD.md](./PRD/THREADS_AUTOMATION_SDD.md) | System design v1.0 |
-
-Salinan spek di root repo (`THREADS_AUTOMATION_*.md`) tetap ada; folder `docs/PRD/` adalah mirror untuk indexing.
 
 ## Quick links
 
@@ -36,3 +48,4 @@ Salinan spek di root repo (`THREADS_AUTOMATION_*.md`) tetap ada; folder `docs/PR
 | Sample CSV | [../sample-posts.csv](../sample-posts.csv) |
 | Frontend | `frontend/` (Vite :5173) |
 | Backend | `backend/` (Express :3000) |
+| Tests | `npm test -w backend` |

@@ -8,6 +8,7 @@ export default defineConfig({
     proxy: {
       '/v1': 'http://localhost:3000',
       '/api': 'http://localhost:3000',
+      '/media': 'http://localhost:3000',
     },
   },
 });

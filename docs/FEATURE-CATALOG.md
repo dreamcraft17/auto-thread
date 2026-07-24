@@ -1,8 +1,8 @@
 # Threads Automation — Feature Catalog
 
 **Owner:** Dozer · **Company:** DN Tech  
-**UpdatedAt:** 24 Juli 2026  
-**Spec:** PRD/SRS/SDD v1.0 Draft  
+**UpdatedAt:** 25 Juli 2026  
+**Spec:** PRD/SRS/SDD v2.0 Live Publish & Media  
 **Path:** `auto/`
 
 ## Cara membaca
@@ -29,22 +29,27 @@
 | Fitur | Kapabilitas | Surface | Status |
 |-------|-------------|---------|--------|
 | Single schedule | Caption + waktu + timezone; preview | Dashboard form | Available |
+| Media attach | PNG/JPEG/GIF/WebP, max 4 × 5MB, magic-byte check | Schedule form, `POST /v1/posts/upload-media` | Available |
 | Edit / cancel | Update/delete sebelum publish | `PUT/DELETE /v1/posts/:id` | Available |
 | Bulk CSV import | Validasi batch | Import dialog, `POST /v1/posts/import` | Available |
 | Lists by status | scheduled / published / failed | Dashboard + API | Available |
 | Search/filter | Filter status/search/date | `GET /v1/posts` | Available |
-| Media URLs | Kolom array di DB | Schema | Partial — Roadmap UX |
 | Manual retry | Retry failed post | `POST /v1/posts/:id/retry` | Available |
+| Publish history | Attempt timeline + CSV export | Post card, `GET /v1/posts/:id/history` | Available |
 
 ## 3. Auto-publish engine
 
 | Fitur | Kapabilitas | Surface | Status |
 |-------|-------------|---------|--------|
+| Live / dry-run toggle | DB setting; env force dry-run | Settings, `GET/PATCH /v1/settings` | Available |
+| Live warning | Confirmation modal + persistent banner | Settings / Layout | Available |
 | Cron due scan | Menit-an scan post due | node-cron | Available |
 | Bull queue | Job publish async | Redis/Bull | Available |
-| Playwright publish | Browser post ke threads.net | Worker | Conditional (dry-run default) |
+| Playwright publish | Text + media attach + text fallback | Worker | Conditional (live needs toggle + env) |
 | Auto retry | 3x exponential backoff | Job service | Available |
-| Activity log | Audit actions | `activity_logs` | Available |
+| Activity + audit log | Actions + live toggle audit | `activity_logs`, `audit_log` | Available |
+| History retention | 90-day prune | Nightly maintenance | Available |
+| Nightly canary | Staging smoke + Slack | `npm run canary`, cron 02:00 UTC | Conditional |
 
 ## 4. Dashboard & notifications
 
@@ -55,20 +60,28 @@
 | Queue status | Worker/queue view | `/dashboard/queue` | Available |
 | In-app notifications | List + mark read | Dashboard | Available |
 | Email notifications | Success/fail via SendGrid | Notification service | Conditional |
+| Slack critical alerts | Permanent publish fail / canary | `SLACK_WEBHOOK_URL` | Conditional |
 
-## 5. Roadmap (Phase 3 / OOS)
+## 5. Quality
+
+| Fitur | Kapabilitas | Surface | Status |
+|-------|-------------|---------|--------|
+| API unit/route tests | Jest + Supertest | `npm test -w backend` | Available |
+| Worker mock tests | Mocked Playwright | Jest | Available |
+| Live publish runbook | Ops checklist | [RUNBOOK.md](./RUNBOOK.md) | Available |
+
+## 6. Roadmap (OOS v2.0)
 
 | Fitur | Catatan |
 |-------|---------|
-| Image/video attach UI + reliable publish | PRD Phase 3 |
 | Schedule templates | PRD Phase 3 |
 | Multi-account | SRS out of scope |
 | Engagement analytics | Butuh sumber data Threads |
 | Official Threads API | Saat Meta expose + approve |
 | AI caption generation | SRS out of scope |
 | Mobile app | SRS out of scope |
-| Automated test suite | Engineering DoD |
+| Video media | v2.0 images only |
 
 ## Ringkasan produk
 
-Threads Automation = **scheduler + Playwright publisher** untuk Threads, dengan dashboard monitoring dan retry. Cocok untuk penggunaan internal; produksi live butuh dry-run off, secrets kuat, dan mitigasi risiko ToS/automation.
+Threads Automation = **scheduler + Playwright publisher** untuk Threads, dengan **live/dry-run control**, **image media**, **publish history**, dan dashboard monitoring. Live production: ikuti [RUNBOOK.md](./RUNBOOK.md).

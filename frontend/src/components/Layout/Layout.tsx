@@ -1,8 +1,8 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AppBar, Toolbar, Typography, Button, Box, IconButton, Badge,
-  Menu, MenuItem, Divider, Container,
+  Menu, MenuItem, Divider, Container, Alert,
 } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { logout as logoutAction } from '../../store/slices/authSlice';
 import { logout } from '../../services/auth';
 import { getNotifications, markNotificationRead, markAllNotificationsRead } from '../../services/posts';
+import { getLivePublishSetting } from '../../services/settings';
 import { Notification } from '../../types';
 import { formatRelative } from '../../utils/formatters';
 
@@ -24,6 +25,19 @@ export default function Layout({ children }: LayoutProps) {
   const user = useAppSelector((s) => s.auth.user);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [liveMode, setLiveMode] = useState(false);
+
+  useEffect(() => {
+    getLivePublishSetting()
+      .then((s) => setLiveMode(Boolean(s.value)))
+      .catch(() => setLiveMode(false));
+    const id = setInterval(() => {
+      getLivePublishSetting()
+        .then((s) => setLiveMode(Boolean(s.value)))
+        .catch(() => undefined);
+    }, 30000);
+    return () => clearInterval(id);
+  }, []);
 
   const handleOpenNotifications = async (e: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(e.currentTarget);
@@ -62,6 +76,12 @@ export default function Layout({ children }: LayoutProps) {
           </Button>
         </Toolbar>
       </AppBar>
+
+      {liveMode && (
+        <Alert severity="error" sx={{ borderRadius: 0 }}>
+          ⚠️ LIVE MODE AKTIF — Verify credentials & runbook. Posts will go to real Threads.
+        </Alert>
+      )}
 
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)} PaperProps={{ sx: { width: 360, maxHeight: 400 } }}>
         <Box sx={{ px: 2, py: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

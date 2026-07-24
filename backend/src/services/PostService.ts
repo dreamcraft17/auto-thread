@@ -35,6 +35,9 @@ export class PostService {
     scheduledTime: string;
   }): Promise<Post> {
     const scheduledTime = this.validatePostData(data);
+    if (data.mediaUrls && data.mediaUrls.length > 4) {
+      throw new AppError('VALIDATION_ERROR', 'Maximum 4 media files per post');
+    }
 
     const post = await this.postRepo.create(userId, {
       caption: data.caption.trim(),
@@ -90,7 +93,11 @@ export class PostService {
     }
 
     if (data.mediaUrls !== undefined) {
+      if (data.mediaUrls.length > 4) {
+        throw new AppError('VALIDATION_ERROR', 'Maximum 4 media files per post');
+      }
       updates.media_urls = data.mediaUrls;
+      updates.media_count = data.mediaUrls.length;
     }
 
     const updated = await this.postRepo.update(id, updates);

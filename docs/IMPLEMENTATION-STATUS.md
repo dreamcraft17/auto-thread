@@ -1,51 +1,41 @@
 # Threads Automation — Implementation Status
 
-> Terakhir diperbarui: **24 Juli 2026**  
-> Referensi: PRD/SRS/SDD **v1.0 Draft** (22 Jun 2026)  
+> Terakhir diperbarui: **25 Juli 2026**  
+> Referensi: PRD/SRS/SDD **v2.0 Live Publish & Media** (+ v1.0 baseline)  
 > Owner: Dozer · DN Tech · Local: `auto/`
 
 ## Ringkasan
 
-| Phase (PRD §7) | Target | Status |
-|----------------|--------|--------|
-| Phase 1 — MVP | Auth Threads, single schedule, Playwright engine, dashboard, email | **Done in repo** (email Conditional) |
-| Phase 2 — Enhanced | Bulk CSV, history/timeline, retry, error handling, basic analytics | **Mostly Done** (stats dasar; bukan analytics engagement) |
-| Phase 3 — Advanced | Media, templates, performance analytics, multi-account, rate limiting UX | **Not started** (schema media siap sebagian) |
+| Phase | Target | Status |
+|-------|--------|--------|
+| Phase 1 — MVP | Auth, schedule, Playwright, dashboard | **Done** |
+| Phase 2 — Enhanced | Bulk CSV, history, retry, stats | **Done** |
+| **v2.0 — Live Publish & Media** | Live toggle, media upload/attach, publish history, tests, runbook | **Done** |
+| Phase 3 leftovers | Multi-account, templates, official API, AI | **Roadmap / OOS** |
 
-**Catatan:** Checkbox di PRD root masih `[ ]` (dokumen Draft belum di-tick). README produk menandai MVP `[x]` — living status mengikuti **kode**, bukan checkbox PRD lama.
+## Matriks fitur vs spek v2.0
 
-## Matriks fitur vs spek
-
-| Area | PRD/SRS | Kode | Catatan |
-|------|---------|------|---------|
-| Schedule single post | US1 | Available | Form + preview |
-| Bulk CSV | US2 / Phase 2 | Available | Validasi + import |
-| Monitor activity | US3 | Available | Lists + timeline + stats |
-| Failure + retry | US4 | Available | Auto 3x + manual retry |
-| Credential encryption | NFR Security | Available | At rest |
-| Email notify | Phase 1 | Conditional | SendGrid |
-| Live Playwright | Engine | Conditional | Dry-run default |
-| Image/media | Phase 3 | Partial | `media_urls[]` · UI/pipeline belum lengkap |
-| Multi-account | Phase 3 / OOS | Roadmap | |
-| AI content | OOS | Roadmap | |
-| Official Threads API | OOS | Roadmap | |
-| Automated tests | NFR implied | Missing | Gap P0 engineering |
-
-## Frontend
-
-| Route | Status |
-|-------|--------|
-| `/login` | Done |
-| `/` Dashboard | Done |
-| `/settings` | Done |
+| Area | FR | Kode | Catatan |
+|------|----|------|---------|
+| Live publish toggle | FR-100 | Available | DB `settings.live_publish_enabled`, default OFF |
+| Confirmation + warning bar | FR-100.5–8 | Available | Settings modal + Layout banner |
+| Media upload | FR-200 | Available | Magic-byte validation, `/data/uploads` |
+| Playwright media attach | FR-300 | Available | Stage → `setInputFiles`, text-only fallback |
+| Publish history | FR-400 | Available | `publish_history` + UI + CSV |
+| Error sanitization / Slack | FR-500 | Available | `sanitizeError` + optional webhook |
+| API tests (Jest) | FR-600 | Available | `npm test -w backend` |
+| Worker mock tests | FR-700 | Available | Playwright mocked |
+| Nightly canary | FR-800 | Conditional | `ENABLE_CANARY` + credentials |
 
 ## Backend routes (`/v1`)
 
 | Group | Status |
 |-------|--------|
 | `/auth/*` | Done |
-| `/posts/*` | Done |
+| `/posts/*` | Done (+ `upload-media`, `/:id/history`) |
+| `/settings` | Done (GET/PATCH) |
 | `/dashboard/*` | Done |
+| `/media/*` | Done (static uploads) |
 | `/health` | Done |
 
 ## Verifikasi lokal
@@ -53,15 +43,17 @@
 ```bash
 cd auto
 npm install
-cp .env.example .env
-npm run docker:up
+cp .env.example .env   # Postgres + Redis native (bukan Docker)
 npm run db:migrate
+npm test -w backend
 npm run dev
 # UI http://localhost:5173 · API http://localhost:3000
+# VPS: docs/DEPLOY.md · Live mode: docs/RUNBOOK.md
 ```
 
-## Mulai PRD berikutnya
+## Spek
 
-1. Baca [NEXT-PRD-BRIEF.md](./NEXT-PRD-BRIEF.md)  
-2. Cross-check [FEATURE-CATALOG.md](./FEATURE-CATALOG.md)  
-3. Baseline detail: [CURRENT-IMPLEMENTATION.md](./CURRENT-IMPLEMENTATION.md)
+- [PRD-v2.0-Live-Publish-Media.md](./PRD/PRD-v2.0-Live-Publish-Media.md)
+- [SRS-v2.0-Functional-Requirements.md](./PRD/SRS-v2.0-Functional-Requirements.md)
+- [SDD-v2.0-System-Design.md](./PRD/SDD-v2.0-System-Design.md)
+- [RUNBOOK.md](./RUNBOOK.md)

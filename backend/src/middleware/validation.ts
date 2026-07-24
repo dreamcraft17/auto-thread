@@ -8,13 +8,13 @@ export const loginSchema = Joi.object({
 
 export const createPostSchema = Joi.object({
   caption: Joi.string().required().min(1).max(500),
-  mediaUrls: Joi.array().items(Joi.string().uri()).max(3).optional(),
+  mediaUrls: Joi.array().items(Joi.string().uri()).max(4).optional(),
   scheduledTime: Joi.string().isoDate().required(),
 });
 
 export const updatePostSchema = Joi.object({
   caption: Joi.string().min(1).max(500).optional(),
-  mediaUrls: Joi.array().items(Joi.string().uri()).max(3).optional(),
+  mediaUrls: Joi.array().items(Joi.string().uri()).max(4).optional(),
   scheduledTime: Joi.string().isoDate().optional(),
 }).min(1);
 

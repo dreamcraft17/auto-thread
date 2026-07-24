@@ -1,11 +1,19 @@
 import { chromium, Browser, Page } from 'playwright';
+import fs from 'fs/promises';
+import os from 'os';
+import path from 'path';
 import { env } from '../config/env';
 import { logger } from '../utils/logger';
+import { MediaService } from '../services/MediaService';
+import { sanitizeError } from './sanitizer';
 
 export interface PublishResult {
   success: boolean;
   threadsPostId?: string;
+  threadsUrl?: string;
   error?: string;
+  mediaAttached?: boolean;
+  mediaFallback?: boolean;
 }
 
 export interface LoginResult {
@@ -14,7 +22,13 @@ export interface LoginResult {
   error?: string;
 }
 
+export interface PublishOptions {
+  /** When true, simulate publish without hitting Threads. */
+  dryRun?: boolean;
+}
+
 let browserInstance: Browser | null = null;
+const mediaService = new MediaService();
 
 async function getBrowser(): Promise<Browser> {
   if (!browserInstance || !browserInstance.isConnected()) {
@@ -26,8 +40,9 @@ async function getBrowser(): Promise<Browser> {
   return browserInstance;
 }
 
-export async function loginToThreads(username: string, password: string): Promise<LoginResult> {
-  if (env.playwrightDryRun) {
+export async function loginToThreads(username: string, password: string, options: PublishOptions = {}): Promise<LoginResult> {
+  const dryRun = options.dryRun ?? env.playwrightDryRun;
+  if (dryRun) {
     logger.info(`[DRY RUN] Simulating Threads login for ${username}`);
     await new Promise((r) => setTimeout(r, 500));
     return { success: true, sessionToken: `dry-run-session-${Date.now()}` };
@@ -56,26 +71,77 @@ export async function loginToThreads(username: string, password: string): Promis
     return { success: true, sessionToken };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Login failed';
-    logger.error('Threads login failed', { error: message });
-    return { success: false, error: message };
+    logger.error('Threads login failed', { error: sanitizeError(message) });
+    return { success: false, error: sanitizeError(message) };
   } finally {
     if (page) await page.close();
   }
 }
 
+async function stageMediaFiles(mediaUrls: string[]): Promise<{ localPaths: string[]; stagingDir: string | null }> {
+  if (!mediaUrls.length) return { localPaths: [], stagingDir: null };
+
+  const localPaths = await mediaService.resolveMany(mediaUrls);
+  if (!localPaths.length) return { localPaths: [], stagingDir: null };
+
+  const stagingDir = await fs.mkdtemp(path.join(os.tmpdir(), 'threads-media-'));
+  const staged: string[] = [];
+
+  for (const src of localPaths) {
+    const dest = path.join(stagingDir, path.basename(src));
+    await fs.copyFile(src, dest);
+    staged.push(dest);
+  }
+
+  return { localPaths: staged, stagingDir };
+}
+
+async function attachMedia(page: Page, localPaths: string[]): Promise<boolean> {
+  if (!localPaths.length) return false;
+
+  const fileInput = page.locator('input[type="file"]').first();
+  const count = await fileInput.count();
+  if (!count) {
+    throw new Error('Media file input not found on compose page');
+  }
+
+  await fileInput.setInputFiles(localPaths);
+
+  // Wait briefly for preview / upload indicator
+  await page.waitForTimeout(1500);
+  return true;
+}
+
 export async function publishToThreads(
   caption: string,
   sessionToken: string,
-  mediaUrls: string[] = []
+  mediaUrls: string[] = [],
+  options: PublishOptions = {}
 ): Promise<PublishResult> {
-  if (env.playwrightDryRun) {
-    logger.info(`[DRY RUN] Simulating publish: "${caption.slice(0, 50)}..."`);
+  const dryRun = options.dryRun ?? env.playwrightDryRun;
+
+  if (dryRun) {
+    logger.info(`[DRY RUN] Simulating publish: "${caption.slice(0, 50)}..." media=${mediaUrls.length}`);
     await new Promise((r) => setTimeout(r, 1000));
-    return { success: true, threadsPostId: `dry-run-post-${Date.now()}` };
+    const id = `dry-run-post-${Date.now()}`;
+    return {
+      success: true,
+      threadsPostId: id,
+      threadsUrl: `https://www.threads.net/t/${id}`,
+      mediaAttached: mediaUrls.length > 0,
+    };
   }
 
   let page: Page | null = null;
+  let stagingDir: string | null = null;
+  let mediaFallback = false;
+  let mediaAttached = false;
+
   try {
+    const staged = await stageMediaFiles(mediaUrls);
+    stagingDir = staged.stagingDir;
+    const localPaths = staged.localPaths;
+
     const browser = await getBrowser();
     const context = await browser.newContext();
     const cookies = sessionToken.split('; ').map((pair) => {
@@ -94,9 +160,18 @@ export async function publishToThreads(
     const textArea = page.locator('div[contenteditable="true"], textarea').first();
     await textArea.fill(caption);
 
-    if (mediaUrls.length > 0) {
-      const fileInput = page.locator('input[type="file"]');
-      await fileInput.setInputFiles(mediaUrls);
+    if (localPaths.length > 0) {
+      try {
+        mediaAttached = await attachMedia(page, localPaths);
+      } catch (mediaErr) {
+        mediaFallback = true;
+        const msg = mediaErr instanceof Error ? mediaErr.message : 'Media attach failed';
+        logger.warn(`Media attach failed, falling back to text-only: ${sanitizeError(msg)}`);
+      }
+    } else if (mediaUrls.length > 0) {
+      // Files missing on disk — continue text-only (FR-300.10)
+      mediaFallback = true;
+      logger.warn('media_urls present but no local files found; publishing text-only');
     }
 
     const postButton = page.locator('div[role="button"]:has-text("Post"), button:has-text("Post")').last();
@@ -104,13 +179,27 @@ export async function publishToThreads(
 
     await page.waitForTimeout(3000);
 
-    return { success: true, threadsPostId: `threads-${Date.now()}` };
+    const threadsPostId = `threads-${Date.now()}`;
+    return {
+      success: true,
+      threadsPostId,
+      threadsUrl: `https://www.threads.net/t/${threadsPostId}`,
+      mediaAttached,
+      mediaFallback,
+    };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Publish failed';
-    logger.error('Threads publish failed', { error: message });
-    return { success: false, error: message };
+    logger.error('Threads publish failed', { error: sanitizeError(message) });
+    return { success: false, error: sanitizeError(message), mediaFallback };
   } finally {
     if (page) await page.close();
+    if (stagingDir) {
+      try {
+        await fs.rm(stagingDir, { recursive: true, force: true });
+      } catch {
+        /* ignore cleanup errors */
+      }
+    }
   }
 }
 

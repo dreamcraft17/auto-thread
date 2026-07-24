@@ -30,6 +30,7 @@ export interface Post {
   user_id: string;
   caption: string;
   media_urls: string[];
+  media_count?: number;
   scheduled_time: Date;
   published_time: Date | null;
   status: PostStatus;

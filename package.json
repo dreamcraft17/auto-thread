@@ -11,8 +11,8 @@
     "build": "npm run build -w backend && npm run build -w frontend",
     "db:migrate": "npm run migrate -w backend",
     "db:seed": "npm run seed -w backend",
-    "docker:up": "docker compose up -d",
-    "docker:down": "docker compose down"
+    "test": "npm test -w backend",
+    "start": "npm run start -w backend"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

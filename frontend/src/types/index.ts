@@ -5,6 +5,7 @@ export interface Post {
   userId: string;
   caption: string;
   mediaUrls: string[];
+  mediaCount?: number;
   scheduledTime: string;
   publishedTime: string | null;
   status: PostStatus;
@@ -13,6 +14,15 @@ export interface Post {
   threadsPostId: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface PublishHistoryItem {
+  id: string;
+  timestamp: string;
+  mode: 'live' | 'dry-run';
+  status: 'pending' | 'success' | 'fail';
+  errorMsg: string | null;
+  threadsUrl: string | null;
 }
 
 export interface User {

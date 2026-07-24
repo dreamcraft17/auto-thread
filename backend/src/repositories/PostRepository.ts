@@ -15,11 +15,13 @@ export class PostRepository {
     scheduledTime: Date;
     status?: PostStatus;
   }): Promise<Post> {
+    const mediaUrls = data.mediaUrls || [];
     const [post] = await db('posts')
       .insert({
         user_id: userId,
         caption: data.caption,
-        media_urls: data.mediaUrls || [],
+        media_urls: mediaUrls,
+        media_count: mediaUrls.length,
         scheduled_time: data.scheduledTime,
         status: data.status || 'scheduled',
       })
@@ -32,13 +34,17 @@ export class PostRepository {
     mediaUrls?: string[];
     scheduledTime: Date;
   }>): Promise<Post[]> {
-    const rows = posts.map((p) => ({
-      user_id: userId,
-      caption: p.caption,
-      media_urls: p.mediaUrls || [],
-      scheduled_time: p.scheduledTime,
-      status: 'scheduled' as PostStatus,
-    }));
+    const rows = posts.map((p) => {
+      const mediaUrls = p.mediaUrls || [];
+      return {
+        user_id: userId,
+        caption: p.caption,
+        media_urls: mediaUrls,
+        media_count: mediaUrls.length,
+        scheduled_time: p.scheduledTime,
+        status: 'scheduled' as PostStatus,
+      };
+    });
     const inserted = await db('posts').insert(rows).returning('*');
     return inserted.map(mapRow);
   }
@@ -99,6 +105,7 @@ export class PostRepository {
   async update(id: string, data: Partial<{
     caption: string;
     media_urls: string[];
+    media_count: number;
     scheduled_time: Date;
     status: PostStatus;
     published_time: Date;
@@ -107,9 +114,13 @@ export class PostRepository {
     threads_post_id: string;
     updated_at: Date;
   }>): Promise<Post> {
+    const payload = { ...data, updated_at: new Date() } as Record<string, unknown>;
+    if (Array.isArray(data.media_urls) && data.media_count === undefined) {
+      payload.media_count = data.media_urls.length;
+    }
     const [post] = await db('posts')
       .where({ id })
-      .update({ ...data, updated_at: new Date() })
+      .update(payload)
       .returning('*');
     return mapRow(post);
   }

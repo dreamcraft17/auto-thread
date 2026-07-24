@@ -34,9 +34,39 @@ export async function getFailedPosts(limit = 10, offset = 0) {
   return data.data as { posts: Post[]; pagination: Pagination };
 }
 
-export async function updatePost(id: string, payload: Partial<{ caption: string; scheduledTime: string }>) {
+export async function updatePost(
+  id: string,
+  payload: Partial<{ caption: string; scheduledTime: string; mediaUrls: string[] }>
+) {
   const { data } = await api.put(`/posts/${id}`, payload);
   return data.data as Post;
+}
+
+export async function uploadMedia(file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+  const { data } = await api.post('/posts/upload-media', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data.data as { media_url: string; file_size: number; mime_type: string };
+}
+
+export async function getPostHistory(postId: string) {
+  const { data } = await api.get(`/posts/${postId}/history`);
+  return data.data.history as import('../types').PublishHistoryItem[];
+}
+
+export async function exportPostHistoryCsv(postId: string) {
+  const { data } = await api.get(`/posts/${postId}/history`, {
+    params: { format: 'csv' },
+    responseType: 'blob',
+  });
+  const url = window.URL.createObjectURL(new Blob([data]));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `publish-history-${postId}.csv`;
+  a.click();
+  window.URL.revokeObjectURL(url);
 }
 
 export async function deletePost(id: string) {

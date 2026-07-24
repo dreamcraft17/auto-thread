@@ -2,6 +2,7 @@ import { postQueue } from '../config/queue';
 import { PublishingService } from '../services/PublishingService';
 import { logger } from '../utils/logger';
 import cron from 'node-cron';
+import { startMaintenanceJobs } from './maintenance';
 
 const publishingService = new PublishingService();
 
@@ -23,6 +24,8 @@ export function startWorkers(): void {
       logger.error('Cron job error', { error });
     }
   });
+
+  startMaintenanceJobs();
 
   logger.info('Workers started: Bull queue processor + cron scheduler');
 }

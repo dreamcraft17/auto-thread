@@ -6,8 +6,8 @@
 | **Folder / package** | `auto/` · `threads-automation` |
 | **Owner** | Dozer (CEO + Tech Lead) |
 | **Company** | DN Tech (PT. Dozer Napitupulu Technology) |
-| **UpdatedAt** | 24 Juli 2026 |
-| **Spec** | PRD/SRS/SDD v1.0 Draft (22 Jun 2026) |
+| **UpdatedAt** | 25 Juli 2026 |
+| **Spec** | PRD/SRS/SDD **v2.0** (+ v1.0 baseline) |
 | **License** | Private — internal use only |
 
 ---
@@ -17,48 +17,51 @@
 Aplikasi web internal untuk **menjadwalkan dan auto-publish** postingan ke akun **Meta Threads** (threads.net) tanpa harus online di jam tayang.
 
 **Masalah:** content creator / social media manager membuang waktu untuk posting manual berulang.  
-**Jawaban:** schedule caption (+ media path di schema), antrean publish, retry, dan dashboard monitoring.
+**Jawaban:** schedule caption + gambar, antrean publish, retry, history attempt, dan dashboard monitoring — dengan saklar **dry-run / live** yang aman.
 
-Bukan produk SaaS multi-tenant publik seperti dnPeople; ini tool operasional dengan login memakai **kredensial Threads** user, disimpan terenkripsi.
+Bukan produk SaaS multi-tenant publik seperti dnPeople; ini tool operasional dengan login memakai **kredensial Threads** user, disimpan terenkripsi. Deploy **tanpa Docker** (Postgres + Redis + Node di VPS).
 
-## Visi (dari PRD v1.0)
+## Visi
 
-- Schedule post dengan tanggal/waktu spesifik (+ timezone)
-- Auto-publish andal (≥95% on-time target PRD)
-- Dashboard monitor scheduled / published / failed
-- Minimal intervensi manual (retry + notifikasi)
+- Schedule post dengan tanggal/waktu (+ timezone) dan media gambar
+- Auto-publish andal (±5 menit dari due time, target spek)
+- Dashboard + publish history per attempt
+- Minimal intervensi (retry + notifikasi); live mode hanya saat sengaja diaktifkan
 
 ## Siapa penggunanya?
 
-| Persona | Kebutuhan |
-|---------|-----------|
-| Content creator | Schedule 1–N post, pantau status |
-| Social media manager | Bulk CSV untuk plan mingguan |
-| (Sistem) | Retry gagal, log aktivitas, notifikasi |
+| Persona | Kebutuhan | Baca |
+|---------|-----------|------|
+| Content creator | Schedule 1–N post + gambar, pantau status | [USER-GUIDE.md](./USER-GUIDE.md) |
+| Social media manager | Bulk CSV untuk plan mingguan | [USER-GUIDE.md](./USER-GUIDE.md) |
+| Ops / engineer | Deploy, live toggle, runbook | [DEPLOY.md](./DEPLOY.md), [RUNBOOK.md](./RUNBOOK.md), [HOW-IT-WORKS.md](./HOW-IT-WORKS.md) |
 
-Tidak ada RBAC multi-role (admin/HR/dll). Auth = JWT per user setelah login Threads berhasil (atau dry-run).
+Tidak ada RBAC multi-role. Auth = JWT setelah login Threads berhasil (atau dry-run).
 
 ## Milestone
 
-| Phase (PRD) | Target | Status kode (Jul 2026) |
-|-------------|--------|-------------------------|
-| Phase 1 MVP | Auth, single schedule, Playwright publish, dashboard, email | **Done in repo** (email Conditional) |
-| Phase 2 Enhanced | Bulk CSV, history, retry, basic analytics | **Sebagian besar Done** (CSV + retry + lists; analytics masih basic stats) |
-| Phase 3 Advanced | Media UI, templates, multi-account, deeper analytics | **Roadmap** |
+| Phase | Target | Status |
+|-------|--------|--------|
+| Phase 1 MVP | Auth, schedule, Playwright, dashboard | **Done** |
+| Phase 2 Enhanced | CSV, retry, lists, stats | **Done** |
+| **v2.0** | Live toggle, media, history, tests, runbook | **Done** |
+| Berikutnya | Multi-account, templates, official API, … | Roadmap |
 
 ## Stack (ringkas)
 
 | Layer | Teknologi |
 |-------|-----------|
-| Frontend | React 18, Vite, MUI 6, Redux Toolkit, React Router 7 |
-| Backend | Express 4, TypeScript, Joi, Winston |
-| DB | PostgreSQL 15 (Knex) |
-| Queue | Redis 7 + Bull |
+| Frontend | React 18, Vite, MUI, Redux Toolkit |
+| Backend | Express, TypeScript |
+| DB | PostgreSQL (native host) |
+| Queue | Redis + Bull (native host) |
 | Automation | Playwright → threads.net |
-| Scheduler | node-cron (scan due posts) |
-
-Detail: [ARCHITECTURE.md](./ARCHITECTURE.md).
+| Scheduler | node-cron |
 
 ## Dokumentasi
 
-Mulai: [00_INDEX.md](./00_INDEX.md) · PRD berikutnya: [NEXT-PRD-BRIEF.md](./NEXT-PRD-BRIEF.md)
+| | |
+|---|---|
+| Indeks | [00_INDEX.md](./00_INDEX.md) |
+| Cara pakai | [USER-GUIDE.md](./USER-GUIDE.md) |
+| Cara kerja | [HOW-IT-WORKS.md](./HOW-IT-WORKS.md) |

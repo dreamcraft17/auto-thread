@@ -7,9 +7,11 @@
 | Spec baseline | PRD/SRS/SDD v1.0 Draft · Phase 1–2 largely in code |
 | Local path | `auto/` |
 | Owner | Dozer · DN Tech |
-| UpdatedAt | 24 Juli 2026 |
+| UpdatedAt | 25 Juli 2026 (v2.0 shipped; lihat FEATURE-CATALOG) |
 
-> **Cara pakai:** Yang di **Available now** = behavior existing (backward compatible kecuali PRD mengubahnya). **Conditional** = ada di kode tapi bergantung env/provider. **Roadmap** = butuh PRD baru.
+> Panduan produk: [USER-GUIDE.md](./USER-GUIDE.md) · [HOW-IT-WORKS.md](./HOW-IT-WORKS.md).
+>
+> **Cara baca baseline:** Yang di **Available now** = behavior existing (backward compatible kecuali PRD mengubahnya). **Conditional** = ada di kode tapi bergantung env/provider. **Roadmap** = butuh PRD baru.
 
 ---
 
@@ -38,7 +40,7 @@
 | API areas | auth · posts · dashboard · health |
 | Models | 5 tabel inti |
 | Spec docs | PRD + SRS + SDD di `docs/PRD/` |
-| Automated tests | **Belum ada** |
+| Automated tests | **Ada** (`npm test -w backend`) |
 
 ---
 
@@ -64,10 +66,9 @@ Dari SRS out-of-scope + PRD Phase 3:
 - AI content generation
 - Mobile app
 - Schedule templates library (UI)
-- Media upload UX lengkap (kolom `media_urls` ada; pipeline real media Conditional)
+- Video / multi-account / templates / official Threads API
 - Analytics performa Threads (impressions/engagement) — hanya basic post counts
 - Server-side token revoke / session store (logout client-side)
-- Test suite (unit/e2e/Playwright)
 
 ---
 

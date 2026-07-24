@@ -2,9 +2,9 @@
 
 **Base URL (dev):** `http://localhost:3000/v1`  
 **Auth:** `Authorization: Bearer <JWT>` (kecuali login & health)  
-**UpdatedAt:** 24 Juli 2026
+**UpdatedAt:** 25 Juli 2026
 
-Mount alternatif: `/api` (sama router).
+Mount alternatif: `/api` (sama router). Media files: `GET /media/{filename}` (unversioned).
 
 ## Auth
 
@@ -19,7 +19,7 @@ Mount alternatif: `/api` (sama router).
 
 | Method | Path | Keterangan |
 |--------|------|------------|
-| POST | `/posts` | Create scheduled post |
+| POST | `/posts` | Create scheduled post (`mediaUrls` optional, max 4) |
 | GET | `/posts` | List (filter: status, search, date) |
 | GET | `/posts/:id` | Detail |
 | PUT | `/posts/:id` | Update scheduled |
@@ -28,6 +28,8 @@ Mount alternatif: `/api` (sama router).
 | GET | `/posts/published` | History |
 | GET | `/posts/failed` | Failed |
 | POST | `/posts/import` | CSV multipart |
+| POST | `/posts/upload-media` | Image multipart → `{ media_url, file_size, mime_type }` |
+| GET | `/posts/:id/history` | Publish attempts (`?format=csv` for export) |
 | POST | `/posts/:id/retry` | Manual retry |
 
 ### CSV format
@@ -38,6 +40,13 @@ caption,date,time,timezone
 ```
 
 Contoh: [`../sample-posts.csv`](../sample-posts.csv).
+
+## Settings
+
+| Method | Path | Keterangan |
+|--------|------|------------|
+| GET | `/settings?key=live_publish_enabled` | Current live flag (default false) |
+| PATCH | `/settings` | Body: `{ "key": "live_publish_enabled", "value": true }` |
 
 ## Dashboard
 
@@ -57,4 +66,4 @@ Contoh: [`../sample-posts.csv`](../sample-posts.csv).
 |--------|------|
 | GET | `/health` (unversioned di app) |
 
-Spek lengkap historis: [PRD §8](./PRD/THREADS_AUTOMATION_PRD.md) (path naming sedikit berbeda `/api/posts` vs implementasi `/v1/posts`).
+Ops: [RUNBOOK.md](./RUNBOOK.md). Spek v2.0: [PRD](./PRD/PRD-v2.0-Live-Publish-Media.md).
