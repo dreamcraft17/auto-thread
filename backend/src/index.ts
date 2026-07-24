@@ -8,7 +8,7 @@ async function main() {
   startWorkers();
 
   const server = app.listen(env.port, () => {
-    logger.info(`API server running on http://localhost:${env.port}`);
+    logger.info(`Server listening on http://localhost:${env.port} (API + SPA same origin)`);
     logger.info(`Playwright dry-run: ${env.playwrightDryRun}`);
   });
 

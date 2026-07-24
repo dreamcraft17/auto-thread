@@ -26,7 +26,7 @@
 | [AI-CONTENT.md](./AI-CONTENT.md) | **v3.0 AI** — generate, batch, brand, cost, API |
 | [HOW-IT-WORKS.md](./HOW-IT-WORKS.md) | **Cara kerja** — komponen, alur publish, dry-run/live, media |
 | [PROJECT-OVERVIEW.md](./PROJECT-OVERVIEW.md) | Apa itu produk, visi, persona |
-| [DEPLOY.md](./DEPLOY.md) | VPS: Postgres + Redis + systemd (**no Docker**) |
+| [DEPLOY.md](./DEPLOY.md) | VPS: **1 URL + 1 PM2 (`ai-thread`)** + Nginx (**no Docker**) |
 | [RUNBOOK.md](./RUNBOOK.md) | Checklist enable live mode dengan aman |
 | [FEATURE-CATALOG.md](./FEATURE-CATALOG.md) | Available / Conditional / Roadmap |
 | [IMPLEMENTATION-STATUS.md](./IMPLEMENTATION-STATUS.md) | Status v2.0 vs spek |

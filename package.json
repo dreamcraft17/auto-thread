@@ -9,10 +9,15 @@
   "scripts": {
     "dev": "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
     "build": "npm run build -w backend && npm run build -w frontend",
+    "build:prod": "VITE_API_URL=/v1 npm run build",
     "db:migrate": "npm run migrate -w backend",
     "db:seed": "npm run seed -w backend",
     "test": "npm test -w backend",
-    "start": "npm run start -w backend"
+    "start": "npm run start -w backend",
+    "pm2:start": "pm2 start ecosystem.config.cjs",
+    "pm2:reload": "pm2 reload ai-thread",
+    "pm2:stop": "pm2 stop ai-thread",
+    "pm2:logs": "pm2 logs ai-thread"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

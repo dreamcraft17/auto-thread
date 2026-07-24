@@ -5,7 +5,11 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const defaultUploadDir = path.resolve(__dirname, '../../../data/uploads');
 
+/** Built SPA — default monorepo `frontend/dist` (served by the same Node process in prod). */
+const defaultFrontendDist = path.resolve(__dirname, '../../../frontend/dist');
+
 export const env = {
+  nodeEnv: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.API_PORT || '3000', 10),
   databaseUrl: process.env.DATABASE_URL || 'postgresql://threads:threads@localhost:5432/threads_automation',
   databasePoolSize: parseInt(process.env.DATABASE_POOL_SIZE || '20', 10),
@@ -25,6 +29,13 @@ export const env = {
   backoffDelaysMs: [60_000, 300_000, 900_000],
   publishRateLimitMs: 10_000,
   uploadDir: process.env.UPLOAD_DIR || defaultUploadDir,
+  /** Absolute path to Vite build output. Empty / missing dir = API-only (dev). */
+  frontendDist: process.env.FRONTEND_DIST || defaultFrontendDist,
+  /**
+   * When true, Express serves the SPA from frontendDist on the same origin as /v1.
+   * Default: on in production if the dist folder exists.
+   */
+  serveFrontend: process.env.SERVE_FRONTEND !== 'false',
   publicBaseUrl: (process.env.PUBLIC_BASE_URL || `http://localhost:${process.env.API_PORT || '3000'}`).replace(/\/$/, ''),
   slackWebhookUrl: process.env.SLACK_WEBHOOK_URL || '',
   enableCanary: process.env.ENABLE_CANARY === 'true',

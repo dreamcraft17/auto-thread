@@ -47,7 +47,7 @@ User **tulis (atau AI generate)** caption → **jadwalkan** post (teks ± gambar
 | Playwright | Browser automation login/post ke Threads |
 | Upload dir | File gambar lokal, dilayani di `/media/{file}` |
 
-**Tidak pakai Docker.** Postgres + Redis + Node jalan di host (lihat DEPLOY).
+**Tidak pakai Docker.** Produksi: **satu PM2 (`ai-thread`)** melayani API + SPA + worker di **satu URL**; Nginx hanya proxy. Dev lokal: Vite :5173 + API :3000. Lihat [DEPLOY.md](./DEPLOY.md).
 
 ---
 
@@ -199,4 +199,4 @@ Retensi history: prune otomatis **> 90 hari** (cron maintenance).
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Diagram komponen ringkas |
 | [API.md](./API.md) | Endpoint |
 | [FEATURE-CATALOG.md](./FEATURE-CATALOG.md) | Available / Conditional / Roadmap |
-| [DEPLOY.md](./DEPLOY.md) | Install VPS tanpa Docker |
+| [DEPLOY.md](./DEPLOY.md) | VPS: 1 URL + PM2 `ai-thread` |

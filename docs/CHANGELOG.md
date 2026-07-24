@@ -4,6 +4,19 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [2026-07-25] — Single-URL PM2 deploy
+
+### Added
+- Express serves `frontend/dist` SPA on the same origin as `/v1` (prod)
+- `ecosystem.config.cjs` — PM2 app name **`ai-thread`**
+- `npm run build:prod` (`VITE_API_URL=/v1`) + pm2 helper scripts
+
+### Changed
+- Deploy model: **1 domain + 1 PM2 + Nginx proxy-all** (bukan `api.*` + FE terpisah)
+- `docs/DEPLOY.md` rewritten for this layout
+
+---
+
 ## [2026-07-25] — v3.0 AI Content Generation
 
 ### Added

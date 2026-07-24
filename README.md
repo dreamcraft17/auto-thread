@@ -75,7 +75,13 @@ npm run dev            # API :3000 · UI :5173
 
 Buka http://localhost:5173 → login dengan username/password Threads (atau dry-run).
 
-**VPS / produksi (tanpa Docker):** lihat **[docs/DEPLOY.md](./docs/DEPLOY.md)**.
+**VPS / produksi:** **satu URL** (contoh `https://ai.dntech.id`) + **satu PM2** (`ai-thread`) — API, UI, dan worker di process yang sama. Lihat **[docs/DEPLOY.md](./docs/DEPLOY.md)**.
+
+```bash
+npm run build:prod
+pm2 start ecosystem.config.cjs   # name: ai-thread
+# Nginx: proxy_pass → 127.0.0.1:3000 (semua path)
+```
 
 **Live publish:**
 
@@ -128,7 +134,7 @@ v2.0 (live + media + tests) dan v3.0 (AI content) sudah di repo. Kandidat beriku
 | [docs/AI-CONTENT.md](./docs/AI-CONTENT.md) | **v3.0 AI** generate / batch / cost |
 | [docs/HOW-IT-WORKS.md](./docs/HOW-IT-WORKS.md) | **Cara kerja** sistem (alur, dry-run/live, media) |
 | [docs/00_INDEX.md](./docs/00_INDEX.md) | Indeks semua docs |
-| [docs/DEPLOY.md](./docs/DEPLOY.md) | Deploy VPS **tanpa Docker** |
+| [docs/DEPLOY.md](./docs/DEPLOY.md) | Deploy VPS: **1 URL + PM2 `ai-thread`** |
 | [docs/RUNBOOK.md](./docs/RUNBOOK.md) | Enable live publish |
 | [docs/FEATURE-CATALOG.md](./docs/FEATURE-CATALOG.md) | Katalog fitur |
 | [docs/PRD/](./docs/PRD/) | PRD · SRS · SDD |

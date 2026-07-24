@@ -5,24 +5,24 @@
 
 ## Deploy
 
-Runtime **tanpa Docker**: PostgreSQL + Redis di host, API/worker via Node/systemd. Lihat [DEPLOY.md](./DEPLOY.md).
+Runtime **tanpa Docker**: PostgreSQL + Redis di host, **satu PM2 process** (`ai-thread`) melayani API + SPA + worker. Nginx hanya reverse-proxy. Lihat [DEPLOY.md](./DEPLOY.md).
 
 ## Komponen
 
 ```
-Frontend (React/Vite :5173)
-    │  JWT Bearer
+Browser → https://ai.dntech.id (satu URL)
+    │
     ▼
-API Express (:3000)  /v1 | /api | /media
-    ├── PostgreSQL
-    │     users, posts, jobs, activity_logs, notifications
-    │     settings, publish_history, audit_log
-    │     generated_captions, brand_guidelines, posting_heatmap
-    ├── Redis + Bull (publish jobs + retries)
-    ├── Uploads dir → static /media
-    ├── node-cron (due scan + maintenance + heatmap refresh)
-    ├── LLMService → claude | codex | openrouter | mock (fallback chain)
-    └── Playwright worker → threads.net (atau dry-run)
+Nginx (TLS) → proxy_pass 127.0.0.1:3000
+    │
+    ▼
+PM2: ai-thread  (Express + Bull + cron)
+    ├── /           → frontend/dist (React SPA)
+    ├── /v1 | /api  → API routes
+    ├── /media      → uploads
+    ├── PostgreSQL / Redis
+    ├── LLMService
+    └── Playwright worker
 ```
 
 ## Publish flow

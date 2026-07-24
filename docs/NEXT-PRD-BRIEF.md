@@ -45,7 +45,7 @@ Nomor versi berikutnya yang wajar: **v3.1** (engagement) atau **v4.0** (multi-ac
 | AI | LLM abstraction (claude/codex/openrouter/mock) + cost tracking |
 | Auth | JWT per user · no RBAC roles |
 | Tests | 16 automated (`npm test -w backend`) |
-| Deploy | Native VPS (systemd + Nginx), **tanpa Docker** |
+| Deploy | Native VPS · **PM2 `ai-thread`** · 1 URL (Nginx proxy) · tanpa Docker |
 
 ---
 
