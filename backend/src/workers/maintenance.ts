@@ -5,6 +5,7 @@ import { env } from '../config/env';
 import { logger } from '../utils/logger';
 import { alertCritical } from '../utils/alerts';
 import { publishToThreads, loginToThreads } from '../utils/playwright';
+import { updateHeatmapJob } from '../jobs/updateHeatmap';
 
 /**
  * Optional nightly canary (FR-800). Skips when ENABLE_CANARY is not true
@@ -67,5 +68,13 @@ export function startMaintenanceJobs(): void {
     }
   });
 
-  logger.info('Maintenance jobs scheduled (history prune + optional canary)');
+  cron.schedule('30 2 * * *', async () => {
+    try {
+      await updateHeatmapJob();
+    } catch (error) {
+      logger.error('Heatmap cron error', { error });
+    }
+  });
+
+  logger.info('Maintenance jobs scheduled (history prune + optional canary + heatmap)');
 }

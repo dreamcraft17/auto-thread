@@ -62,7 +62,19 @@
 | Email notifications | Success/fail via SendGrid | Notification service | Conditional |
 | Slack critical alerts | Permanent publish fail / canary | `SLACK_WEBHOOK_URL` | Conditional |
 
-## 5. Quality
+## 5. AI Content (v3.0)
+
+| Fitur | Kapabilitas | Surface | Status |
+|-------|-------------|---------|--------|
+| Generate caption | Topic → LLM caption + validation | Dashboard modal, `POST /v1/ai/generate-caption` | Available |
+| Brand guidelines | Voice/example/hashtags in prompt | Settings, `/v1/ai/brand-guidelines` | Available |
+| Approve & schedule | Mandatory review → schedule | Modal / `approve-schedule` | Available |
+| Batch generate | Max 10 topics + staggered slots | Batch dialog | Available |
+| Best time | Heatmap suggestion | `GET /v1/ai/best-time` | Available |
+| Cost tracking | Per-provider monthly spend | Settings usage | Available |
+| LLM switch | claude / codex / openrouter / mock | `LLM_PROVIDER` env | Available |
+
+## 6. Quality
 
 | Fitur | Kapabilitas | Surface | Status |
 |-------|-------------|---------|--------|
@@ -70,7 +82,7 @@
 | Worker mock tests | Mocked Playwright | Jest | Available |
 | Live publish runbook | Ops checklist | [RUNBOOK.md](./RUNBOOK.md) | Available |
 
-## 6. Roadmap (OOS v2.0)
+## 7. Roadmap (OOS v2.0)
 
 | Fitur | Catatan |
 |-------|---------|

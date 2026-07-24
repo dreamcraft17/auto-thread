@@ -1,14 +1,14 @@
 # Threads Automation
 
-**Threads Automation** adalah aplikasi web internal untuk **menjadwalkan dan auto-publish** postingan ke akun **Meta Threads** — supaya content creator / social media manager tidak harus online di jam tayang.
+**Threads Automation** adalah aplikasi web internal untuk **membuat caption dengan AI, menjadwalkan, dan auto-publish** postingan ke akun **Meta Threads** — supaya content creator / social media manager tidak harus online di jam tayang.
 
 | | |
 |---|---|
 | Owner | Dozer (CEO + Tech Lead) |
 | Company | DN Tech (PT. Dozer Napitupulu Technology) |
 | Package | `threads-automation` · folder `auto/` |
-| Status | **v2.0** Live Publish & Media · live Conditional (toggle + `PLAYWRIGHT_DRY_RUN`) |
-| Spec | PRD/SRS/SDD **v2.0** |
+| Status | **v3.0** AI Content · v2.0 live/media · LLM via env |
+| Spec | PRD **v3.0 AI** + v2.0 |
 | Docs | **[Cara pakai](./docs/USER-GUIDE.md)** · **[Cara kerja](./docs/HOW-IT-WORKS.md)** · [Deploy](./docs/DEPLOY.md) · [Index](./docs/00_INDEX.md) |
 | UpdatedAt | 25 Juli 2026 |
 | License | Private — internal use only |
@@ -19,16 +19,17 @@
 
 | Masalah | Jawaban di app |
 |---------|----------------|
-| Posting manual berulang | Schedule caption + waktu/timezone |
-| Plan konten mingguan | Bulk import CSV |
-| Takut gagal diam-diam | Retry 3x + list failed + notifikasi |
-| Perlu pantau konsistensi | Dashboard scheduled / published / failed + stats |
+| Buntu ide caption | AI generate sesuai brand voice (single / batch) |
+| Posting manual berulang | Schedule caption + gambar + waktu/timezone |
+| Plan konten mingguan | Bulk import CSV + batch generate |
+| Takut gagal diam-diam | Retry 3x + list failed + notifikasi + publish history |
+| Perlu pantau konsistensi | Dashboard scheduled / published / failed + stats + AI cost |
 
 **Bukan:** HRIS, official Meta Ads tool, atau mobile app. Login memakai kredensial Threads user (disimpan terenkripsi).
 
 ---
 
-## Fitur (v2.0)
+## Fitur (v3.0)
 
 - [x] Login Threads + enkripsi kredensial + JWT session  
 - [x] Single post scheduler + preview + **media attach** (max 4 images)  
@@ -41,8 +42,9 @@
 - [x] In-app notifications · email Conditional (SendGrid)  
 - [x] Settings preferensi notifikasi  
 - [x] Automated tests (`npm test`)
+- [x] **AI caption** generate / batch / brand / best-time / cost (`docs/AI-CONTENT.md`)
 
-**Default lokal:** `PLAYWRIGHT_DRY_RUN=true` dan live toggle OFF (simulasi — aman tanpa publish nyata).
+**Default lokal:** `PLAYWRIGHT_DRY_RUN=true`, live toggle OFF, `LLM_PROVIDER=mock` (simulasi — aman tanpa publish nyata & tanpa biaya AI).
 
 Detail status: [docs/FEATURE-CATALOG.md](./docs/FEATURE-CATALOG.md) · [docs/IMPLEMENTATION-STATUS.md](./docs/IMPLEMENTATION-STATUS.md).
 
@@ -82,6 +84,9 @@ Buka http://localhost:5173 → login dengan username/password Threads (atau dry-
 3. Ganti `JWT_SECRET` & `ENCRYPTION_KEY`  
 4. Opsional: `SENDGRID_API_KEY`  
 5. Aktifkan toggle live di Settings (ikuti [docs/RUNBOOK.md](./docs/RUNBOOK.md))
+
+**AI sungguhan:** set `LLM_PROVIDER=claude|codex|openrouter` + API key-nya di `.env` (default `mock`). Detail: [docs/AI-CONTENT.md](./docs/AI-CONTENT.md).
+
 ---
 
 ## Stack (ringkas)
@@ -92,6 +97,7 @@ Buka http://localhost:5173 → login dengan username/password Threads (atau dry-
 | Backend | Express, TypeScript |
 | DB / Queue | PostgreSQL, Redis + Bull |
 | Automation | Playwright → threads.net |
+| AI | Claude · Codex · OpenRouter · Mock (pilih via `LLM_PROVIDER`) |
 
 Arsitektur: [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) · API: [docs/API.md](./docs/API.md).
 
@@ -110,7 +116,7 @@ Lihat `sample-posts.csv`.
 
 ## PRD berikutnya
 
-v2.0 (live + media + tests) sudah di repo. Untuk ide berikutnya: **[docs/NEXT-PRD-BRIEF.md](./docs/NEXT-PRD-BRIEF.md)**.
+v2.0 (live + media + tests) dan v3.0 (AI content) sudah di repo. Kandidat berikutnya: **engagement signals nyata** — lihat **[docs/NEXT-PRD-BRIEF.md](./docs/NEXT-PRD-BRIEF.md)**.
 
 ---
 
@@ -118,7 +124,8 @@ v2.0 (live + media + tests) sudah di repo. Untuk ide berikutnya: **[docs/NEXT-PR
 
 | Dokumen | Isi |
 |---------|-----|
-| [docs/USER-GUIDE.md](./docs/USER-GUIDE.md) | **Cara pakai** (login → schedule → history → live) |
+| [docs/USER-GUIDE.md](./docs/USER-GUIDE.md) | **Cara pakai** (login → schedule → history → live → AI) |
+| [docs/AI-CONTENT.md](./docs/AI-CONTENT.md) | **v3.0 AI** generate / batch / cost |
 | [docs/HOW-IT-WORKS.md](./docs/HOW-IT-WORKS.md) | **Cara kerja** sistem (alur, dry-run/live, media) |
 | [docs/00_INDEX.md](./docs/00_INDEX.md) | Indeks semua docs |
 | [docs/DEPLOY.md](./docs/DEPLOY.md) | Deploy VPS **tanpa Docker** |

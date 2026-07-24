@@ -1,47 +1,49 @@
 # Threads Automation — Cara Kerja
 
-**UpdatedAt:** 25 Juli 2026 · v2.0  
+**UpdatedAt:** 25 Juli 2026 · v3.0  
 **Untuk:** engineer / ops yang perlu paham alur sistem  
-**Cara pakai UI:** [USER-GUIDE.md](./USER-GUIDE.md) · **Deploy:** [DEPLOY.md](./DEPLOY.md)
+**Cara pakai UI:** [USER-GUIDE.md](./USER-GUIDE.md) · **AI:** [AI-CONTENT.md](./AI-CONTENT.md) · **Deploy:** [DEPLOY.md](./DEPLOY.md)
 
 ---
 
 ## Ringkas satu kalimat
 
-User **jadwalkan** post (teks ± gambar) → sistem **antrikan** → saat waktunya tiba, worker **buka Threads via Playwright** → status jadi **published / failed** (+ history tiap attempt).
+User **tulis (atau AI generate)** caption → **jadwalkan** post (teks ± gambar) → sistem **antrikan** → saat waktunya tiba, worker **buka Threads via Playwright** → status jadi **published / failed** (+ history tiap attempt).
 
 ---
 
 ## Komponen
 
 ```
-┌─────────────┐     JWT      ┌──────────────────┐
-│  Frontend   │ ──────────►  │  API (Express)   │
-│  React/Vite │              │  /v1 + /media    │
-└─────────────┘              └────────┬─────────┘
-                                      │
-                    ┌─────────────────┼─────────────────┐
-                    ▼                 ▼                 ▼
-              PostgreSQL           Redis            Disk
-              posts, users,        Bull queue       data/uploads
-              settings, history    jobs
-                                      │
-                                      ▼
-                              Worker (sama proses Node)
-                              cron 1 menit + Bull
-                                      │
-                                      ▼
-                              Playwright → threads.net
-                              (atau dry-run simulasi)
+┌─────────────┐     JWT      ┌──────────────────────┐      ┌──────────────┐
+│  Frontend   │ ──────────►  │   API (Express)      │ ───► │ LLM provider │
+│  React/Vite │              │ /v1 + /ai + /media   │      │ claude|codex │
+└─────────────┘              └──────────┬───────────┘      │ openrouter   │
+                                        │                  │ mock         │
+                    ┌───────────────────┼──────────────┐   └──────────────┘
+                    ▼                   ▼              ▼
+              PostgreSQL             Redis           Disk
+              posts, users,          Bull queue      data/uploads
+              settings, history,     jobs
+              captions, heatmap
+                                        │
+                                        ▼
+                                Worker (sama proses Node)
+                                cron 1 menit + Bull
+                                        │
+                                        ▼
+                                Playwright → threads.net
+                                (atau dry-run simulasi)
 ```
 
 | Bagian | Peran |
 |--------|--------|
-| Frontend | Login, dashboard, schedule form, settings, history |
-| API | Auth JWT, CRUD posts, upload media, settings, history |
-| PostgreSQL | Sumber kebenaran post + settings + publish_history |
+| Frontend | Login, dashboard, schedule form, AI modal, settings, history |
+| API | Auth JWT, CRUD posts, upload media, settings, AI generation, history |
+| LLM provider | Generate caption (configurable via `LLM_PROVIDER`) |
+| PostgreSQL | Sumber kebenaran post + settings + history + caption/heatmap |
 | Redis + Bull | Antrian job publish + retry delay |
-| Cron | Setiap menit scan post `scheduled` yang sudah due |
+| Cron | Setiap menit scan post `scheduled` yang sudah due; harian untuk maintenance/heatmap |
 | Playwright | Browser automation login/post ke Threads |
 | Upload dir | File gambar lokal, dilayani di `/media/{file}` |
 
@@ -126,6 +128,26 @@ Dua saklar, digabung:
 
 ---
 
+## AI caption (v3.0)
+
+```
+Topic  →  LLMService (provider dari env)
+       →  prompt + brand_guidelines aktif
+       →  caption + validasi heuristik (panjang, hashtag, brand fit)
+       →  simpan ke generated_captions (provider, token, cost)
+       →  user approve  →  schedule lewat alur post biasa
+```
+
+- Provider: `claude` / `codex` / `openrouter` / `mock`, ganti lewat env tanpa ubah kode.
+- Gagal provider utama → fallback otomatis (openrouter → claude → mock).
+- Approval user **wajib** sebelum jadi post.
+- Best time dari `posting_heatmap` (seed default + refresh harian dari volume publish 30 hari).
+- Biaya per provider dicatat, ada peringatan jika lewat `AI_MONTHLY_BUDGET_CENTS`.
+
+Detail: [AI-CONTENT.md](./AI-CONTENT.md).
+
+---
+
 ## Auth & session
 
 1. Login: username/password Threads → Playwright validasi (atau dry-run fake session).
@@ -142,7 +164,8 @@ Dua saklar, digabung:
 |-------|-----|
 | `publish_history` | Tiap attempt publish (pending → success/fail) |
 | `activity_logs` | Aksi user/sistem (CREATE, PUBLISH, …) |
-| `audit_log` | Perubahan settings (toggle live) |
+| `audit_log` | Perubahan settings (toggle live) + brand guidelines + caption approval |
+| `generated_captions` | Semua hasil AI: topic, provider, token, cost, approval |
 | `jobs` | Log eksekusi job Bull |
 
 Retensi history: prune otomatis **> 90 hari** (cron maintenance).
@@ -162,7 +185,8 @@ Retensi history: prune otomatis **> 90 hari** (cron maintenance).
 - Bukan official Threads API — **UI automation** (risiko ToS / selector berubah).
 - Satu kelas user (bukan multi-role admin).
 - Satu akun Threads per login user tool (multi-account = roadmap).
-- Gambar saja di v2.0 (bukan video).
+- Gambar saja (bukan video).
+- Heatmap memakai volume publish sebagai proxy engagement (metrik asli Threads belum tersedia).
 
 ---
 
@@ -171,6 +195,7 @@ Retensi history: prune otomatis **> 90 hari** (cron maintenance).
 | Dokumen | Isi |
 |---------|-----|
 | [USER-GUIDE.md](./USER-GUIDE.md) | Cara pakai harian |
+| [AI-CONTENT.md](./AI-CONTENT.md) | AI caption v3.0 |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Diagram komponen ringkas |
 | [API.md](./API.md) | Endpoint |
 | [FEATURE-CATALOG.md](./FEATURE-CATALOG.md) | Available / Conditional / Roadmap |

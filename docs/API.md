@@ -48,6 +48,21 @@ Contoh: [`../sample-posts.csv`](../sample-posts.csv).
 | GET | `/settings?key=live_publish_enabled` | Current live flag (default false) |
 | PATCH | `/settings` | Body: `{ "key": "live_publish_enabled", "value": true }` |
 
+## AI (v3.0)
+
+| Method | Path | Keterangan |
+|--------|------|------------|
+| POST | `/ai/generate-caption` | `{ topic, tone?, length? }` → caption + validation |
+| POST | `/ai/batch-generate` | `{ topicsText }` or `{ topics: [] }` max 10 |
+| GET | `/ai/best-time` | Heatmap suggestion + `suggestedAt` ISO |
+| GET | `/ai/usage` | Cost by provider (month) |
+| GET | `/ai/brand-guidelines` | List brand templates |
+| PUT | `/ai/brand-guidelines` | Upsert active brand voice |
+| POST | `/ai/captions/:id/approve` | Mark approved + return best time |
+| POST | `/ai/captions/:id/approve-schedule` | Approve + create scheduled post |
+
+Detail: [AI-CONTENT.md](./AI-CONTENT.md).
+
 ## Dashboard
 
 | Method | Path | Keterangan |

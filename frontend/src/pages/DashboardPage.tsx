@@ -5,11 +5,14 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import SearchIcon from '@mui/icons-material/Search';
 import Layout from '../components/Layout/Layout';
 import PostCard from '../components/PostCard/PostCard';
 import ScheduleForm from '../components/ScheduleForm/ScheduleForm';
 import ImportDialog from '../components/ImportDialog/ImportDialog';
+import GenerateCaptionModal from '../components/GenerateCaptionModal/GenerateCaptionModal';
+import BatchGenerateDialog from '../components/BatchGenerateDialog/BatchGenerateDialog';
 import { useAppSelector } from '../store/hooks';
 import {
   getScheduledPosts, getPublishedPosts, getFailedPosts, getStats,
@@ -27,7 +30,11 @@ export default function DashboardPage() {
   const [search, setSearch] = useState('');
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [generateOpen, setGenerateOpen] = useState(false);
+  const [batchOpen, setBatchOpen] = useState(false);
   const [editPost, setEditPost] = useState<Post | null>(null);
+  const [aiCaption, setAiCaption] = useState<string | undefined>();
+  const [aiSchedule, setAiSchedule] = useState<string | undefined>();
   const [page, setPage] = useState(1);
 
   const loadData = useCallback(async () => {
@@ -88,8 +95,19 @@ export default function DashboardPage() {
     <Layout>
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
         <Typography variant="h4" fontWeight={700}>Dashboard</Typography>
-        <Stack direction="row" spacing={1}>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => { setEditPost(null); setScheduleOpen(true); }}>
+        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+          <Button
+            variant="contained"
+            color="secondary"
+            startIcon={<AutoAwesomeIcon />}
+            onClick={() => setGenerateOpen(true)}
+          >
+            Generate Caption
+          </Button>
+          <Button variant="outlined" startIcon={<AutoAwesomeIcon />} onClick={() => setBatchOpen(true)}>
+            Batch Generate
+          </Button>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => { setEditPost(null); setAiCaption(undefined); setAiSchedule(undefined); setScheduleOpen(true); }}>
             Schedule Post
           </Button>
           <Button variant="outlined" startIcon={<UploadFileIcon />} onClick={() => setImportOpen(true)}>
@@ -186,11 +204,25 @@ export default function DashboardPage() {
 
       <ScheduleForm
         open={scheduleOpen}
-        onClose={() => { setScheduleOpen(false); setEditPost(null); }}
+        onClose={() => { setScheduleOpen(false); setEditPost(null); setAiCaption(undefined); setAiSchedule(undefined); }}
         onSuccess={loadData}
         editPost={editPost}
+        initialCaption={aiCaption}
+        initialScheduledTime={aiSchedule}
       />
       <ImportDialog open={importOpen} onClose={() => setImportOpen(false)} onSuccess={loadData} />
+      <GenerateCaptionModal
+        open={generateOpen}
+        onClose={() => setGenerateOpen(false)}
+        onUseCaption={(caption, scheduledTime) => {
+          setEditPost(null);
+          setAiCaption(caption);
+          setAiSchedule(scheduledTime);
+          setScheduleOpen(true);
+        }}
+        onScheduled={loadData}
+      />
+      <BatchGenerateDialog open={batchOpen} onClose={() => setBatchOpen(false)} onDone={loadData} />
     </Layout>
   );
 }

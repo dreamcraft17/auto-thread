@@ -30,4 +30,13 @@ export const env = {
   enableCanary: process.env.ENABLE_CANARY === 'true',
   canaryThreadsUsername: process.env.CANARY_THREADS_USERNAME || '',
   canaryThreadsPassword: process.env.CANARY_THREADS_PASSWORD || '',
+  llmProvider: (process.env.LLM_PROVIDER || 'claude').toLowerCase(),
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY || '',
+  anthropicModel: process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-20250514',
+  githubApiKey: process.env.GITHUB_API_KEY || process.env.OPENAI_API_KEY || '',
+  githubModel: process.env.GITHUB_MODEL || 'gpt-4o-mini',
+  openrouterApiKey: process.env.OPENROUTER_API_KEY || '',
+  openrouterModel: process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini',
+  aiMonthlyBudgetCents: parseInt(process.env.AI_MONTHLY_BUDGET_CENTS || '5000', 10),
+  aiGenPerMinute: parseInt(process.env.AI_GEN_PER_MINUTE || '10', 10),
 };

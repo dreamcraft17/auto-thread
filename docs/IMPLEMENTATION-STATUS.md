@@ -1,7 +1,7 @@
 # Threads Automation — Implementation Status
 
 > Terakhir diperbarui: **25 Juli 2026**  
-> Referensi: PRD/SRS/SDD **v2.0 Live Publish & Media** (+ v1.0 baseline)  
+> Referensi: PRD/SRS/SDD **v3.0 AI Content** (+ v2.0) (+ v1.0 baseline)  
 > Owner: Dozer · DN Tech · Local: `auto/`
 
 ## Ringkasan
@@ -34,6 +34,7 @@
 | `/auth/*` | Done |
 | `/posts/*` | Done (+ `upload-media`, `/:id/history`) |
 | `/settings` | Done (GET/PATCH) |
+| `/ai/*` | Done (v3.0 generate/batch/brand/usage) |
 | `/dashboard/*` | Done |
 | `/media/*` | Done (static uploads) |
 | `/health` | Done |

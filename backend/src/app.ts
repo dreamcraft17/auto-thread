@@ -7,6 +7,7 @@ import authRoutes from './routes/auth';
 import postsRoutes from './routes/posts';
 import dashboardRoutes from './routes/dashboard';
 import settingsRoutes from './routes/settings';
+import aiRoutes from './routes/ai';
 import { errorHandler } from './middleware/errorHandler';
 import { env } from './config/env';
 
@@ -43,6 +44,7 @@ v1.use('/auth', authRoutes);
 v1.use('/posts', postsRoutes);
 v1.use('/dashboard', dashboardRoutes);
 v1.use('/settings', settingsRoutes);
+v1.use('/ai', aiRoutes);
 
 app.use('/v1', v1);
 app.use('/api', v1);

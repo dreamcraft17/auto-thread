@@ -4,6 +4,20 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [2026-07-25] — v3.0 AI Content Generation
+
+### Added
+- LLM abstraction (claude / codex / openrouter / mock) + `@anthropic-ai/sdk`
+- Tables: `generated_captions`, `brand_guidelines`, `posting_heatmap`
+- APIs under `/v1/ai/*` (generate, batch, best-time, usage, brand, approve-schedule)
+- UI: Generate Caption modal, Batch Generate, Brand Guidelines, AI usage
+- Docs: `AI-CONTENT.md` + USER-GUIDE section
+
+### Changed
+- Default local LLM provider: `mock` (no API key required)
+
+---
+
 ## [2026-07-25] — User guide + how-it-works docs
 
 ### Added

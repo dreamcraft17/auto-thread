@@ -155,6 +155,19 @@ Detail ops: [RUNBOOK.md](./RUNBOOK.md).
 
 ---
 
+## 10. AI Caption (v3.0)
+
+1. Dashboard → **Generate Caption**.
+2. Isi topic (+ tone/length) → Generate.
+3. Review badge **Generated**, cek warning validasi.
+4. **Use Caption** (isi form schedule) atau **Approve & Schedule** (pakai best time).
+5. **Batch Generate** untuk plan mingguan (max 10 baris).
+6. Settings → Brand Guidelines / AI Usage & Cost.
+
+Default lokal tanpa API key: provider **mock**. Produksi: set `LLM_PROVIDER` + key. Detail: [AI-CONTENT.md](./AI-CONTENT.md).
+
+---
+
 ## Cheat sheet
 
 | Mau… | Lakukan… |

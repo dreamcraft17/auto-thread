@@ -3,32 +3,32 @@
 | | |
 |---|---|
 | **Dokumen** | Satu file utuh untuk menulis PRD produk berikutnya |
-| **Tanggal** | 24 Juli 2026 |
-| **Baseline kode** | MVP Phase 1 + sebagian besar Phase 2 **sudah di repo** |
-| **Spec lama** | PRD/SRS/SDD **v1.0 Draft** (22 Jun 2026) — checkbox Phase belum di-update |
+| **Tanggal** | 25 Juli 2026 |
+| **Baseline kode** | v1.0 MVP + **v2.0 Live Publish & Media** + **v3.0 AI Content** — semuanya sudah di repo |
+| **Spec terakhir** | PRD/SRS/SDD v2.0 · PRD v3.0 (internal) |
 | **Owner** | Dozer (CEO + Tech Lead) · DN Tech |
 | **Path** | `auto/` |
 | **Ganti dokumen ini?** | Setelah PRD berikutnya di-sign-off atau baseline berubah |
 
-> **Cara pakai:** Baca atas → bawah. Jangan janjikan ulang §3 sebagai fitur baru. Tulis PRD hanya untuk §5–§6. Setiap story wajib memenuhi §8.
+> **Cara pakai:** Baca atas → bawah. Jangan janjikan ulang §3 sebagai fitur baru. Tulis PRD hanya untuk §5–§6. Setiap story wajib memenuhi §7.
 
 ---
 
 ## 1. Keputusan singkat: PRD berikutnya tentang apa?
 
-Pilih **satu** jalur (atau pecah jadi dua dokumen berurutan):
+Pilih **satu** jalur:
 
 | Jalur | Isi | Kapan |
 |-------|-----|--------|
-| **A — Harden & ship live** | Test suite, runbook live Playwright, secret hardening, observability, UAT publish nyata | Jika tool mau dipakai tim setiap hari |
-| **B — Produk Phase 3** | Media posts, schedule templates, multi-account | Setelah A stabil atau paralel tipis |
-| **C — Platform bet** | Migrasi ke Official Threads API (saat tersedia) + analytics | Hanya jika API/partner ready |
+| **A — Data & analytics nyata** | Tarik engagement asli (views/likes/replies) → heatmap & rekomendasi AI berbasis performa, bukan proxy volume | Begitu ada cara ambil metrik (scrape terukur atau API) |
+| **B — Skala operasional** | Multi-account, schedule templates, content calendar view | Jika tim/klien bertambah |
+| **C — Platform bet** | Migrasi ke Official Threads API + analytics resmi | Hanya jika API/partner ready |
 
-**Rekomendasi P0:** **Jalur A + media (potongan Phase 3)** sebagai **PRD v1.1** atau **v2.0 — Live Publish & Media**.
+**Rekomendasi P0:** **Jalur A** sebagai **PRD v3.1 — Engagement Signals**.
 
-Alasan: dry-run default = produk belum “benar-benar publish”; tanpa tests, regresi Playwright mudah; media adalah value terbesar berikutnya yang sudah punya kolom DB.
+Alasan: v3.0 sudah bisa bikin caption dan menyarankan jam tayang, tapi rekomendasinya masih berbasis **volume publish**, bukan performa. Tanpa sinyal engagement, nilai AI mentok di “hemat waktu nulis”, belum “naikkan hasil”.
 
-Nomor versi spek berikutnya yang wajar: **v1.1** (hardening) atau **v2.0** (media + multi-account).
+Nomor versi berikutnya yang wajar: **v3.1** (engagement) atau **v4.0** (multi-account/platform).
 
 ---
 
@@ -36,15 +36,16 @@ Nomor versi spek berikutnya yang wajar: **v1.1** (hardening) atau **v2.0** (medi
 
 | Item | Nilai |
 |------|--------|
-| Produk | Scheduler + auto-publish ke Meta Threads |
-| Frontend | React/Vite/MUI · 3 halaman (login, dashboard, settings) |
-| Backend | Express `/v1` · auth · posts · dashboard |
-| Data | PostgreSQL + Knex · 5 tabel |
-| Queue | Redis + Bull · cron due-scan |
-| Automation | Playwright · **DRY_RUN default true** |
+| Produk | AI caption + scheduler + auto-publish ke Meta Threads |
+| Frontend | React/Vite/MUI · 3 halaman + AI modal & batch dialog |
+| Backend | Express `/v1` · auth · posts · dashboard · settings · ai |
+| Data | PostgreSQL + Knex · 11 tabel |
+| Queue | Redis + Bull · cron due-scan + maintenance + heatmap |
+| Automation | Playwright · dry-run default + live toggle di DB |
+| AI | LLM abstraction (claude/codex/openrouter/mock) + cost tracking |
 | Auth | JWT per user · no RBAC roles |
-| Tests | **0** automated |
-| Email | SendGrid Conditional |
+| Tests | 16 automated (`npm test -w backend`) |
+| Deploy | Native VPS (systemd + Nginx), **tanpa Docker** |
 
 ---
 
@@ -52,10 +53,14 @@ Nomor versi spek berikutnya yang wajar: **v1.1** (hardening) atau **v2.0** (medi
 
 - Login Threads (dry-run atau live) + enkripsi kredensial + lockout
 - Schedule single post, edit/cancel, CSV bulk import
-- Auto-publish pipeline (cron → queue → worker → Playwright)
-- Retry 3x + manual retry + failed list
+- Media upload (max 4 gambar) + attach saat publish + fallback text-only
+- Live/dry-run toggle + banner + audit log
+- Auto-publish pipeline (cron → queue → worker → Playwright) + retry 3x + manual retry
+- Publish history per attempt + export CSV
+- AI generate caption (single + batch), brand guidelines, validasi caption, approval flow
+- Best-time suggestion dari heatmap, AI usage & cost di Settings
 - Dashboard stats / timeline / queue / in-app notifications
-- Settings notification preferences
+- Test suite backend + runbook + deploy guide
 
 Detail: [CURRENT-IMPLEMENTATION.md](./CURRENT-IMPLEMENTATION.md) · [FEATURE-CATALOG.md](./FEATURE-CATALOG.md).
 
@@ -63,8 +68,10 @@ Detail: [CURRENT-IMPLEMENTATION.md](./CURRENT-IMPLEMENTATION.md) · [FEATURE-CAT
 
 ## 4. Conditional (bukan “belum dikode”)
 
-- Live publish: `PLAYWRIGHT_DRY_RUN=false` + Chromium
-- Email: `SENDGRID_API_KEY`
+- Live publish: `PLAYWRIGHT_DRY_RUN=false` + toggle ON + Chromium
+- LLM sungguhan: `LLM_PROVIDER` + API key (default `mock`)
+- Email: `SENDGRID_API_KEY` · Slack alert: `SLACK_WEBHOOK_URL`
+- Nightly canary: `ENABLE_CANARY` + akun staging
 - Production secrets: `JWT_SECRET`, `ENCRYPTION_KEY`
 - `db:seed` script tanpa folder seeds
 
@@ -74,33 +81,33 @@ Detail: [CURRENT-IMPLEMENTATION.md](./CURRENT-IMPLEMENTATION.md) · [FEATURE-CAT
 
 | Prioritas | Tema | Catatan |
 |-----------|------|---------|
-| **P0** | Automated tests (API + worker dry-run + smoke live gated) | Gap terbesar vs NFR |
-| **P0** | Live publish runbook + selector resilience + alerting | Meta UI sering berubah |
-| **P0 product** | Media attach (image) end-to-end | Kolom `media_urls` sudah ada |
-| **P1** | Schedule templates | Phase 3 |
-| **P1** | Multi-account | OOS di SRS v1 — butuh keputusan keamanan |
-| **P2** | Engagement analytics | Butuh sumber data |
+| **P0** | Engagement ingestion (views/likes/replies per post) | Prasyarat semua analytics; tentukan sumber & legalitasnya |
+| **P0** | Heatmap & AI recommendation berbasis performa nyata | Ganti proxy volume di `posting_heatmap` |
+| **P1** | Content calendar / plan view untuk hasil batch AI | Batch sudah ada, visualisasinya belum |
+| **P1** | Schedule templates | Reusable caption + slot |
+| **P1** | Multi-account | Butuh keputusan keamanan kredensial |
+| **P2** | AI image generation / multi-language | Setelah teks terbukti dipakai |
 | **P2** | Official API migration | Tunggu ketersediaan Meta |
 
 ### Out of scope kecuali PRD eksplisit
 - Mobile app
-- AI caption generator
-- Rebuild queue/DB stack tanpa alasan
+- Rebuild queue/DB/LLM stack tanpa alasan
+- Auto-publish caption AI **tanpa** approval manusia
 - Janji “100% tahan deteksi ban” Meta
 
 ---
 
-## 6. Outline disarankan PRD v2.0 (Live Publish & Media) — skeleton
+## 6. Outline disarankan PRD v3.1 (Engagement Signals) — skeleton
 
 ### 6.1 Outcome
-User bisa: (1) publish nyata ke Threads dengan SLA on-time terukur, (2) lampirkan ≥1 gambar per post, (3) melihat hasil/gagal dengan bukti log, (4) menjalankan regresi otomatis di CI (minimal dry-run).
+User bisa melihat **performa nyata** tiap post dan mendapat rekomendasi jam/topik yang terbukti, bukan tebakan.
 
 ### 6.2 In scope
-1. Mode `dry-run` vs `live` eksplisit di UI/admin flag  
-2. Media upload (tipe/ukuran/batas Threads) + wiring Playwright  
-3. Test plan: unit services, API integration, worker dry-run, optional nightly live canary  
-4. Runbook: rotate credentials, selector break, rate limit  
-5. Audit: siapa publish apa kapan  
+1. Sumber & mekanisme ingestion metrik (frekuensi, rate limit, kegagalan)  
+2. Skema penyimpanan metrik + backfill historis  
+3. Heatmap dan best-time dihitung ulang dari engagement  
+4. Feedback loop ke prompt AI (topik/tone yang perform)  
+5. Dashboard performa: top post, trend mingguan  
 
 ### 6.3 Out of scope
 - Multi-account (PRD terpisah)  
@@ -108,9 +115,9 @@ User bisa: (1) publish nyata ke Threads dengan SLA on-time terukur, (2) lampirka
 - Mobile  
 
 ### 6.4 Risks wajib ditulis
-- Pelanggaran ToS / challenge login / CAPTCHA  
-- Selector Threads berubah  
-- Credential leakage  
+- ToS / rate limit saat mengambil metrik  
+- Metrik hilang atau tidak konsisten → rekomendasi bias  
+- Biaya LLM naik jika prompt membawa banyak konteks metrik  
 
 ---
 
@@ -120,26 +127,26 @@ User bisa: (1) publish nyata ke Threads dengan SLA on-time terukur, (2) lampirka
 |---|------------|
 | 1 | Acceptance Criteria testable? |
 | 2 | Berlaku di dry-run **dan** live (atau eksplisit dry-run only)? |
-| 3 | Kred ke enkripsi kredensial / JWT? |
+| 3 | Terkait enkripsi kredensial / JWT / API key LLM? |
 | 4 | Failure path + retry + notifikasi? |
 | 5 | Perlu migration DB? |
 | 6 | Ada tes otomatis di DoD? |
-| 7 | Risiko Meta/ToS disebutkan? |
+| 7 | Risiko Meta/ToS dan biaya AI disebutkan? |
 
 ---
 
 ## 8. Definition of Done dokumen PRD (sebelum coding)
 
-- [ ] Satu fokus yang jelas (bukan “semua Phase 3”)  
+- [ ] Satu fokus yang jelas  
 - [ ] In/out scope  
 - [ ] Mapping ke baseline (file ini + CURRENT-IMPLEMENTATION)  
-- [ ] NFR: latency publish window, retention log  
+- [ ] NFR: latency publish window, retention log, budget AI  
 - [ ] Security & ToS section  
 - [ ] Test strategy  
-- [ ] Update rencana ke FEATURE-CATALOG setelah ship  
+- [ ] Update FEATURE-CATALOG + CHANGELOG setelah ship  
 
 ---
 
 ## 9. Satu kalimat penutup
 
-> Threads Automation **sudah punya MVP scheduler + queue**; PRD berikutnya **bukan** “bikin scheduler lagi”, melainkan **live publish andal + media (dan/atau tests/ops)**.
+> Threads Automation **sudah bisa menulis, menjadwalkan, dan mempublish**; PRD berikutnya **bukan** “bikin scheduler atau AI lagi”, melainkan **membuktikan hasilnya lewat data engagement nyata**.

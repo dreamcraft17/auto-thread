@@ -38,9 +38,13 @@ interface ScheduleFormProps {
   onClose: () => void;
   onSuccess: () => void;
   editPost?: Post | null;
+  initialCaption?: string;
+  initialScheduledTime?: string;
 }
 
-export default function ScheduleForm({ open, onClose, onSuccess, editPost }: ScheduleFormProps) {
+export default function ScheduleForm({
+  open, onClose, onSuccess, editPost, initialCaption, initialScheduledTime,
+}: ScheduleFormProps) {
   const [preview, setPreview] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -50,8 +54,8 @@ export default function ScheduleForm({ open, onClose, onSuccess, editPost }: Sch
   const { register, handleSubmit, watch, reset, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      caption: editPost?.caption || '',
-      scheduledTime: toLocalDatetimeInput(editPost?.scheduledTime),
+      caption: editPost?.caption || initialCaption || '',
+      scheduledTime: toLocalDatetimeInput(editPost?.scheduledTime || initialScheduledTime),
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     },
   });
@@ -59,15 +63,15 @@ export default function ScheduleForm({ open, onClose, onSuccess, editPost }: Sch
   useEffect(() => {
     if (open) {
       reset({
-        caption: editPost?.caption || '',
-        scheduledTime: toLocalDatetimeInput(editPost?.scheduledTime),
+        caption: editPost?.caption || initialCaption || '',
+        scheduledTime: toLocalDatetimeInput(editPost?.scheduledTime || initialScheduledTime),
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
       setMediaUrls(editPost?.mediaUrls || []);
       setPreview(false);
       setError('');
     }
-  }, [open, editPost, reset]);
+  }, [open, editPost, initialCaption, initialScheduledTime, reset]);
 
   const caption = watch('caption');
   const scheduledTime = watch('scheduledTime');

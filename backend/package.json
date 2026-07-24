@@ -32,7 +32,8 @@
     "pg": "^8.13.1",
     "playwright": "^1.49.1",
     "uuid": "^11.0.5",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "@anthropic-ai/sdk": "^0.39.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

@@ -64,6 +64,20 @@ PLAYWRIGHT_DRY_RUN=false
 UPLOAD_DIR=/var/lib/threads-automation/uploads
 ```
 
+**AI content (v3.0)** — pilih satu provider, sisanya boleh kosong:
+
+```env
+LLM_PROVIDER=claude            # claude | codex | openrouter | mock
+ANTHROPIC_API_KEY=sk-ant-...
+CLAUDE_MODEL=claude-sonnet-4-20250514
+# OPENROUTER_API_KEY=sk-or-...
+# OPENROUTER_MODEL=anthropic/claude-3.5-sonnet
+# CODEX_API_KEY=...
+AI_MONTHLY_BUDGET_CENTS=5000   # peringatan biaya di Settings
+```
+
+Tanpa key apa pun, provider otomatis jatuh ke `mock` (caption template, tanpa biaya) sehingga deploy tetap jalan. Daftar lengkap env: [`.env.example`](../.env.example) · penjelasan: [AI-CONTENT.md](./AI-CONTENT.md).
+
 Buat folder upload:
 
 ```bash
