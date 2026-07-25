@@ -70,12 +70,17 @@ cp .env.example .env
 # edit .env — lihat §4
 
 npm install
+# PENTING: jangan `npm install --omit=dev` / NODE_ENV=production sebelum build.
+# TypeScript + Vite ada di devDependencies — dibutuhkan untuk `npm run build`.
 npx playwright install --with-deps chromium
 npm run db:migrate
 
 # PENTING: FE harus hit /v1 di domain yang sama (bukan api.* terpisah)
 npm run build:prod
 # = VITE_API_URL=/v1 + build backend + frontend
+
+# Setelah build sukses, opsional prune devDeps untuk hemat disk:
+# npm prune --omit=dev
 ```
 
 `build:prod` memastikan axios memakai **`/v1` relatif** → satu origin dengan UI.
