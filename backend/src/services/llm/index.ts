@@ -5,6 +5,7 @@ import { CodexProvider } from './codex.provider';
 import { OpenRouterProvider } from './openrouter.provider';
 import { MockProvider } from './mock.provider';
 import { CaptionLength, CaptionTone, ILLMProvider } from './types';
+import { formatDnTechProductContext, getDnTechProduct } from './dntech-products';
 
 export interface BrandGuidelineInput {
   voice_description?: string | null;
@@ -53,7 +54,8 @@ export class LLMService {
     topic: string,
     tone: CaptionTone | string,
     length: CaptionLength | string,
-    brand?: BrandGuidelineInput | null
+    brand?: BrandGuidelineInput | null,
+    productKey?: string | null,
   ): string {
     const voice =
       brand?.voice_description ||
@@ -64,6 +66,8 @@ export class LLMService {
     const hashtags = brand?.hashtag_defaults || '#dntech #threads';
     const lengthHint =
       length === 'short' ? 'Keep it under ~220 characters.' : 'Aim for ~280-450 characters.';
+    const product = getDnTechProduct(productKey);
+    const productContext = formatDnTechProductContext(product);
 
     return `You are writing for DN Tech's Threads account.
 
@@ -75,11 +79,17 @@ Topic: ${topic}
 Tone: ${tone}
 ${lengthHint}
 
+DN Tech product context (use only relevant facts; never invent features, pricing, customers, metrics, or launch status):
+${productContext}
+
 Requirements:
 - Max 500 characters total
 - Include 2-4 relevant hashtags
 - Sound conversational and authentic
 - Focus on value / learning / shipping
+- Make the connection to DN Tech or the selected product explicit when relevant, without hard selling
+- If the topic is about a product, explain the user problem and one concrete workflow benefit
+- Do not mention this internal context or say that you are an AI
 - Do not wrap the caption in quotes
 - Output ONLY the caption text
 
@@ -90,7 +100,8 @@ Generate the caption now:`;
     topic: string,
     tone: CaptionTone | string = 'casual',
     length: CaptionLength | string = 'medium',
-    brand?: BrandGuidelineInput | null
+    brand?: BrandGuidelineInput | null,
+    productKey?: string | null,
   ): Promise<{
     caption: string;
     provider: string;
@@ -98,7 +109,7 @@ Generate the caption now:`;
     tokensUsed: number;
     generationTimeMs: number;
   }> {
-    const prompt = this.buildPrompt(topic, tone, length, brand);
+    const prompt = this.buildPrompt(topic, tone, length, brand, productKey);
     const started = Date.now();
 
     let result: { text: string; tokensUsed: number };

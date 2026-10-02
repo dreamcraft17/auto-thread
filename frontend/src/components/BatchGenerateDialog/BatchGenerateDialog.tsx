@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button,
-  Box, Typography, Alert, CircularProgress, Chip, Stack, LinearProgress,
+  Box, Typography, Alert, CircularProgress, Chip, Stack, LinearProgress, MenuItem, FormControl, InputLabel, Select,
 } from '@mui/material';
-import { batchGenerate, approveAndSchedule, GeneratedCaption } from '../../services/ai';
+import { batchGenerate, approveAndSchedule, GeneratedCaption, getDnTechProducts, DnTechProduct } from '../../services/ai';
 
 interface Props {
   open: boolean;
@@ -13,12 +13,19 @@ interface Props {
 
 export default function BatchGenerateDialog({ open, onClose, onDone }: Props) {
   const [topicsText, setTopicsText] = useState('');
+  const [product, setProduct] = useState('');
+  const [products, setProducts] = useState<DnTechProduct[]>([]);
   const [loading, setLoading] = useState(false);
   const [scheduling, setScheduling] = useState(false);
   const [error, setError] = useState('');
   const [results, setResults] = useState<GeneratedCaption[]>([]);
   const [slots, setSlots] = useState<string[]>([]);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    if (!open || products.length) return;
+    void getDnTechProducts().then(setProducts).catch(() => undefined);
+  }, [open, products.length]);
 
   const handleGenerate = async () => {
     const topics = topicsText.split('\n').map((l) => l.trim()).filter(Boolean);
@@ -33,7 +40,7 @@ export default function BatchGenerateDialog({ open, onClose, onDone }: Props) {
     setLoading(true);
     setError('');
     try {
-      const data = await batchGenerate(topics);
+      const data = await batchGenerate(topics, 'casual', product || undefined);
       setResults(data.results);
       setSlots(data.suggestedSlots || []);
       const sel: Record<string, boolean> = {};
@@ -89,6 +96,13 @@ export default function BatchGenerateDialog({ open, onClose, onDone }: Props) {
           rows={6}
           placeholder={"Product launch tips\nEngineering challenges\nCulture snapshot"}
         />
+        <FormControl fullWidth size="small" sx={{ mt: 2 }}>
+          <InputLabel>DN Tech product (optional)</InputLabel>
+          <Select label="DN Tech product (optional)" value={product} onChange={(e) => setProduct(e.target.value)}>
+            <MenuItem value="">All DN Tech context</MenuItem>
+            {products.map((item) => <MenuItem key={item.key} value={item.key}>{item.name} · {item.category}</MenuItem>)}
+          </Select>
+        </FormControl>
         {(loading || scheduling) && <LinearProgress sx={{ mt: 2 }} />}
 
         {results.length > 0 && (

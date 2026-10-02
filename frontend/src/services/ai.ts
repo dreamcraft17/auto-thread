@@ -24,13 +24,26 @@ export interface GeneratedCaption {
   error?: string;
 }
 
-export async function generateCaption(topic: string, tone = 'casual', length = 'medium') {
-  const { data } = await api.post('/ai/generate-caption', { topic, tone, length });
+export async function generateCaption(topic: string, tone = 'casual', length = 'medium', product?: string) {
+  const { data } = await api.post('/ai/generate-caption', { topic, tone, length, product });
   return data.data as GeneratedCaption;
 }
 
-export async function batchGenerate(topics: string[], tone = 'casual') {
-  const { data } = await api.post('/ai/batch-generate', { topicsText: topics.join('\n'), tone });
+export interface DnTechProduct {
+  key: string;
+  name: string;
+  category: string;
+  summary: string;
+  audience: string;
+}
+
+export async function getDnTechProducts() {
+  const { data } = await api.get('/ai/products');
+  return data.data as DnTechProduct[];
+}
+
+export async function batchGenerate(topics: string[], tone = 'casual', product?: string) {
+  const { data } = await api.post('/ai/batch-generate', { topicsText: topics.join('\n'), tone, product });
   return data.data as { results: GeneratedCaption[]; suggestedSlots: string[] };
 }
 

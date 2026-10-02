@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button,
   Box, Typography, Alert, MenuItem, CircularProgress, Chip, Stack, FormControl, InputLabel, Select,
 } from '@mui/material';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import { approveAndSchedule, approveCaption, generateCaption, GeneratedCaption, getBestTime } from '../../services/ai';
+import { approveAndSchedule, approveCaption, generateCaption, GeneratedCaption, getBestTime, getDnTechProducts, DnTechProduct } from '../../services/ai';
 import { toLocalDatetimeInput } from '../../utils/formatters';
 
 interface Props {
@@ -16,6 +16,8 @@ interface Props {
 
 export default function GenerateCaptionModal({ open, onClose, onUseCaption, onScheduled }: Props) {
   const [topic, setTopic] = useState('');
+  const [product, setProduct] = useState('');
+  const [products, setProducts] = useState<DnTechProduct[]>([]);
   const [tone, setTone] = useState('casual');
   const [length, setLength] = useState('medium');
   const [result, setResult] = useState<GeneratedCaption | null>(null);
@@ -25,6 +27,11 @@ export default function GenerateCaptionModal({ open, onClose, onUseCaption, onSc
   const [bestTime, setBestTime] = useState<string>('');
   const [bestIso, setBestIso] = useState<string>('');
   const [checklist, setChecklist] = useState({ brand: false, grammar: false, relevant: false });
+
+  useEffect(() => {
+    if (!open || products.length) return;
+    void getDnTechProducts().then(setProducts).catch(() => undefined);
+  }, [open, products.length]);
 
   const reset = () => {
     setResult(null);
@@ -38,7 +45,7 @@ export default function GenerateCaptionModal({ open, onClose, onUseCaption, onSc
     setLoading(true);
     setError('');
     try {
-      const data = await generateCaption(topic, tone, length);
+      const data = await generateCaption(topic, tone, length, product || undefined);
       setResult(data);
       if (regenLeft < 3) setRegenLeft((n) => Math.max(0, n - 1));
       const bt = await getBestTime();
@@ -105,6 +112,14 @@ export default function GenerateCaptionModal({ open, onClose, onUseCaption, onSc
           rows={2}
           sx={{ mt: 1, mb: 2 }}
         />
+
+        <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+          <InputLabel>DN Tech product (optional)</InputLabel>
+          <Select label="DN Tech product (optional)" value={product} onChange={(e) => setProduct(e.target.value)}>
+            <MenuItem value="">All DN Tech context</MenuItem>
+            {products.map((item) => <MenuItem key={item.key} value={item.key}>{item.name} · {item.category}</MenuItem>)}
+          </Select>
+        </FormControl>
 
         <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
           <FormControl fullWidth size="small">

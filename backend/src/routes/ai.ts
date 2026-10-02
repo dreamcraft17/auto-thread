@@ -17,6 +17,7 @@ router.post(
       topic: req.body.topic,
       tone: req.body.tone,
       length: req.body.length,
+      product: req.body.product,
     });
     res.json({ success: true, data });
   })
@@ -32,16 +33,23 @@ router.post(
         .split('\n')
         .map((line: string) => line.trim())
         .filter(Boolean)
-        .map((topic: string) => ({ topic, tone: req.body.tone || 'casual' }));
+        .map((topic: string) => ({ topic, tone: req.body.tone || 'casual', product: req.body.product }));
     }
 
     if (Array.isArray(topics) && typeof topics[0] === 'string') {
-      topics = (topics as string[]).map((topic) => ({ topic, tone: req.body.tone || 'casual' }));
+      topics = (topics as string[]).map((topic) => ({ topic, tone: req.body.tone || 'casual', product: req.body.product }));
     }
 
     const data = await aiService.batchGenerate(req.userId!, topics as Array<{ topic: string; tone?: string; length?: string }>);
     const slots = aiService.suggestBatchSlots(data.results.filter((r) => r.ok).length);
     res.json({ success: true, data: { ...data, suggestedSlots: slots } });
+  })
+);
+
+router.get(
+  '/products',
+  asyncHandler(async (_req: Request, res: Response) => {
+    res.json({ success: true, data: aiService.listProductContexts() });
   })
 );
 

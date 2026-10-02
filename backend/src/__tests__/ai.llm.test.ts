@@ -30,6 +30,15 @@ describe('LLMService (mock)', () => {
     expect(prompt).toContain('tech-forward');
   });
 
+  it('includes the selected DN Tech product context and claim guardrails', () => {
+    const llm = new LLMService(new MockProvider());
+    const prompt = llm.buildPrompt('Payroll untuk bisnis multi-cabang', 'professional', 'medium', null, 'dnpeople');
+    expect(prompt).toContain('dnPeople');
+    expect(prompt).toContain('BPJS/PPh 21');
+    expect(prompt).toContain('never invent features');
+    expect(prompt).not.toContain('dnCore');
+  });
+
   it('generates caption under 500 chars', async () => {
     const llm = new LLMService(new MockProvider());
     const result = await llm.generate('shipping tips', 'casual', 'short');

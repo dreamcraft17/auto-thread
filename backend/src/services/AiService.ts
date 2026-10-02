@@ -5,6 +5,7 @@ import { LLMService } from './llm';
 import { validateCaption } from './CaptionValidator';
 import { alertCritical } from '../utils/alerts';
 import { logger } from '../utils/logger';
+import { DNTECH_PRODUCTS, getDnTechProduct } from './llm/dntech-products';
 
 const genWindow = new Map<string, number[]>();
 
@@ -73,7 +74,7 @@ export class AiService {
 
   async generateCaption(
     userId: string,
-    input: { topic: string; tone?: string; length?: string }
+    input: { topic: string; tone?: string; length?: string; product?: string }
   ) {
     const topic = (input.topic || '').trim();
     if (topic.length < 3 || topic.length > 500) {
@@ -86,7 +87,11 @@ export class AiService {
     const tone = input.tone || brand?.tone_preference || 'casual';
     const length = input.length || 'medium';
 
-    const result = await this.llm.generate(topic, tone, length, brand);
+    const product = input.product ? getDnTechProduct(input.product) : null;
+    if (input.product && !product) {
+      throw new AppError('VALIDATION_ERROR', 'Unknown DN Tech product');
+    }
+    const result = await this.llm.generate(topic, tone, length, brand, product?.key);
     const validation = validateCaption(result.caption, tone);
 
     const [row] = await db('generated_captions')
@@ -121,7 +126,7 @@ export class AiService {
     };
   }
 
-  async batchGenerate(userId: string, topics: Array<{ topic: string; tone?: string; length?: string }>) {
+  async batchGenerate(userId: string, topics: Array<{ topic: string; tone?: string; length?: string; product?: string }>) {
     if (!Array.isArray(topics) || topics.length === 0) {
       throw new AppError('VALIDATION_ERROR', 'topics array is required');
     }
@@ -143,6 +148,12 @@ export class AiService {
       }
     }
     return { results };
+  }
+
+  listProductContexts() {
+    return DNTECH_PRODUCTS.map(({ key, name, category, summary, audience }) => ({
+      key, name, category, summary, audience,
+    }));
   }
 
   async approveCaption(userId: string, id: string) {
